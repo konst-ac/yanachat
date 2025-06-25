@@ -1,0 +1,57 @@
+{
+  "test": {
+    "name": "Test",
+    "age": 25,
+    "description": "slim, pretty",
+    "personality": "funny",
+    "goals": "work",
+    "conflicts": "in love with test2",
+    "id": "test",
+    "created_at": "2025-06-25T20:10:38.084409",
+    "updated_at": "2025-06-25T20:10:38.084425"
+  },
+  "test2": {
+    "name": "Test2",
+    "age": 18,
+    "description": "fat,ugly",
+    "personality": "sad",
+    "goals": "eat",
+    "conflicts": "no",
+    "id": "test2",
+    "created_at": "2025-06-25T20:57:46.190132",
+    "updated_at": "2025-06-25T20:57:46.190148"
+  },
+  "sarah_mitchell": {
+    "name": "Sarah Mitchell",
+    "age": 28,
+    "description": "A determined investigative journalist with sharp eyes and a quick wit. She wears practical clothing and always carries a notebook.",
+    "personality": "Intelligent, persistent, slightly cynical but with a strong moral compass. She's driven by the truth and justice.",
+    "goals": "To expose corruption in the city government and find her missing colleague.",
+    "conflicts": "Internal: Struggles with trust issues after being betrayed by sources. External: Powerful people want to silence her investigation.",
+    "id": "sarah_mitchell",
+    "created_at": "2025-06-25T23:02:48.112399",
+    "updated_at": "2025-06-25T23:02:48.112403"
+  },
+  "detective_marcus_chen": {
+    "name": "Detective Marcus Chen",
+    "age": 42,
+    "description": "A seasoned detective with graying temples and a calm demeanor. He moves with purpose and speaks deliberately.",
+    "personality": "Methodical, patient, and deeply empathetic. He believes in the system but knows its flaws.",
+    "goals": "To solve the case while protecting Sarah and maintaining his integrity.",
+    "conflicts": "Internal: Balancing duty with personal relationships. External: Political pressure to close the case quickly.",
+    "id": "detective_marcus_chen",
+    "created_at": "2025-06-25T23:02:48.112551",
+    "updated_at": "2025-06-25T23:02:48.112555"
+  },
+  "mayor_richard_blackwood": {
+    "name": "Mayor Richard Blackwood",
+    "age": 55,
+    "description": "A charismatic politician with silver hair and expensive suits. He has a practiced smile that doesn't reach his eyes.",
+    "personality": "Charming in public, ruthless in private. He's used to getting what he wants and doesn't like obstacles.",
+    "goals": "To maintain power and cover up his involvement in the corruption scandal.",
+    "conflicts": "Internal: Guilt over his actions but unwilling to face consequences. External: Sarah's investigation threatens everything.",
+    "id": "mayor_richard_blackwood",
+    "created_at": "2025-06-25T23:02:48.112863",
+    "updated_at": "2025-06-25T23:02:48.112867"
+  }
+}

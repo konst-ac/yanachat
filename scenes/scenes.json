@@ -1,0 +1,116 @@
+{
+  "scene_1": {
+    "scene_number": 1,
+    "setting": "home",
+    "characters": "Test",
+    "action": "test eats suchi",
+    "dialogue": "no",
+    "notes": "no",
+    "id": "scene_1",
+    "created_at": "2025-06-25T20:11:23.059980",
+    "updated_at": "2025-06-25T20:11:23.060003"
+  },
+  "scene_2": {
+    "scene_number": 2,
+    "setting": "school",
+    "characters": "Test,Test2",
+    "action": "Test speaks to Test2 about work",
+    "dialogue": "Test: - Hi\nTest2: - Hello\nTest: -you are cool\nTest2: -thank you ",
+    "notes": "",
+    "id": "scene_2",
+    "created_at": "2025-06-25T21:01:02.310123",
+    "updated_at": "2025-06-25T21:01:02.310140"
+  },
+  "scene_3": {
+    "scene_number": 3,
+    "title": "Scene 3 – The Mayor's Response",
+    "location": "City Hall - Mayor's Office",
+    "time_of_day": "Day",
+    "tone_mood": [
+      "tense",
+      "political"
+    ],
+    "characters": [
+      "Mayor Richard Blackwood",
+      "Chief of Staff Lisa"
+    ],
+    "action": "The mayor receives news about Sarah's investigation. He's outwardly calm but his hands betray his nervousness. He gives orders to his staff.",
+    "dialogue": "Blackwood: \"Handle this situation, Lisa. I don't care how.\"\nLisa: \"The detective assigned to the case is Marcus Chen.\"\nBlackwood: \"Marcus Chen? That could be a problem.\"",
+    "beats": [
+      "Mayor learns about investigation",
+      "Lisa reports on detective assignment",
+      "Mayor shows concern about Marcus"
+    ],
+    "goal": "Introduce the antagonist and show his reaction to the investigation threat",
+    "conflict_stakes": "Mayor's political career vs. justice",
+    "links_to_scenes": [
+      "scene_2",
+      "scene_4"
+    ],
+    "id": "scene_3",
+    "created_at": "2025-06-25T23:02:48.113170",
+    "updated_at": "2025-06-25T23:02:48.113175",
+    "notes": []
+  },
+  "scene_4": {
+    "scene_number": 4,
+    "title": "Scene 4 – The Breakthrough",
+    "location": "Sarah's Apartment",
+    "time_of_day": "Night",
+    "tone_mood": [
+      "hopeful",
+      "intense"
+    ],
+    "characters": [
+      "Sarah Mitchell"
+    ],
+    "action": "Sarah works late into the night, piecing together evidence. Her apartment is cluttered with research materials. She discovers a crucial connection.",
+    "dialogue": "Sarah: (to herself) \"Blackwood Construction... city contracts... missing money... It all connects.\"",
+    "beats": [
+      "Sarah works through evidence",
+      "Discovers crucial connection",
+      "Realizes the scope of corruption"
+    ],
+    "goal": "Show Sarah's investigative process and the breakthrough moment",
+    "conflict_stakes": "Finding the truth vs. personal safety",
+    "links_to_scenes": [
+      "scene_3",
+      "scene_5"
+    ],
+    "id": "scene_4",
+    "created_at": "2025-06-25T23:02:48.113335",
+    "updated_at": "2025-06-25T23:02:48.113339",
+    "notes": []
+  },
+  "scene_5": {
+    "scene_number": 5,
+    "title": "Scene 5 – The Confrontation",
+    "location": "Abandoned Warehouse",
+    "time_of_day": "Night",
+    "tone_mood": [
+      "climactic",
+      "dangerous"
+    ],
+    "characters": [
+      "Sarah Mitchell",
+      "Detective Marcus Chen",
+      "Mayor Blackwood"
+    ],
+    "action": "The final confrontation. Sarah and Marcus have evidence, but Blackwood has backup. Tense standoff with guns drawn.",
+    "dialogue": "Blackwood: \"You should have left well enough alone.\"\nSarah: \"The truth always comes out, Mayor.\"\nMarcus: \"It's over, Blackwood. We have everything.\"",
+    "beats": [
+      "Final confrontation begins",
+      "Evidence is presented",
+      "Justice prevails"
+    ],
+    "goal": "Climactic scene with all major characters. High stakes confrontation",
+    "conflict_stakes": "Justice vs. corruption, life and death",
+    "links_to_scenes": [
+      "scene_4"
+    ],
+    "id": "scene_5",
+    "created_at": "2025-06-25T23:02:48.113637",
+    "updated_at": "2025-06-25T23:02:48.113641",
+    "notes": []
+  }
+}

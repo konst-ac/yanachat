@@ -1,0 +1,85 @@
+{
+  "downtown_news_office": {
+    "name": "Downtown News Office",
+    "description": "A bustling newsroom with rows of desks, computers, and the constant hum of activity. Large windows overlook the city skyline.",
+    "objects": [
+      "desks",
+      "computers",
+      "newspapers",
+      "coffee machine",
+      "whiteboard",
+      "filing cabinets"
+    ],
+    "lighting": "Bright fluorescent lighting with natural light from large windows",
+    "date_time": "Daytime, business hours",
+    "id": "downtown_news_office",
+    "created_at": "2025-06-25T23:02:48.111248",
+    "updated_at": "2025-06-25T23:02:48.111257"
+  },
+  "police_station___interrogation_room": {
+    "name": "Police Station - Interrogation Room",
+    "description": "A small, dimly lit room with a metal table and chairs. The walls are bare except for a one-way mirror.",
+    "objects": [
+      "metal table",
+      "chairs",
+      "one-way mirror",
+      "recording equipment",
+      "coffee cups"
+    ],
+    "lighting": "Dim overhead lighting, creates an atmosphere of tension",
+    "date_time": "Night, after hours",
+    "id": "police_station___interrogation_room",
+    "created_at": "2025-06-25T23:02:48.111430",
+    "updated_at": "2025-06-25T23:02:48.111435"
+  },
+  "city_hall___mayor's_office": {
+    "name": "City Hall - Mayor's Office",
+    "description": "An elegant office with mahogany furniture, leather chairs, and city memorabilia. Large windows provide a view of the city.",
+    "objects": [
+      "mahogany desk",
+      "leather chairs",
+      "city memorabilia",
+      "flags",
+      "family photos",
+      "phone"
+    ],
+    "lighting": "Warm, professional lighting with natural light from windows",
+    "date_time": "Daytime, business hours",
+    "id": "city_hall___mayor's_office",
+    "created_at": "2025-06-25T23:02:48.111593",
+    "updated_at": "2025-06-25T23:02:48.111597"
+  },
+  "sarah's_apartment": {
+    "name": "Sarah's Apartment",
+    "description": "A modest apartment cluttered with research materials, newspapers, and takeout containers. The living room serves as her home office.",
+    "objects": [
+      "research materials",
+      "newspapers",
+      "takeout containers",
+      "laptop",
+      "whiteboard",
+      "coffee table"
+    ],
+    "lighting": "Warm lamp lighting, cozy but cluttered",
+    "date_time": "Night, late hours",
+    "id": "sarah's_apartment",
+    "created_at": "2025-06-25T23:02:48.111886",
+    "updated_at": "2025-06-25T23:02:48.111890"
+  },
+  "abandoned_warehouse": {
+    "name": "Abandoned Warehouse",
+    "description": "A large, empty warehouse with concrete floors and metal beams. Dust particles float in the air, and the space echoes.",
+    "objects": [
+      "concrete floors",
+      "metal beams",
+      "dust",
+      "empty space",
+      "loading dock"
+    ],
+    "lighting": "Minimal lighting, shadows and darkness create tension",
+    "date_time": "Night, dark and dangerous",
+    "id": "abandoned_warehouse",
+    "created_at": "2025-06-25T23:02:48.112140",
+    "updated_at": "2025-06-25T23:02:48.112144"
+  }
+}
