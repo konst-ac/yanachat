@@ -91,36 +91,24 @@ class WordExporter:
         """Add a scene in professional screenplay format"""
         # Scene heading
         scene_number = scene_data.get('scene_number', 'N/A')
-        setting = scene_data.get('setting', 'Unknown Location')
-        scene_heading = f"SCENE {scene_number} - {setting.upper()}"
+        # Use new structure: prefer 'title' and 'location' if available
+        title = scene_data.get('title', None)
+        location = scene_data.get('location', None)
+        if title and location:
+            scene_heading = f"SCENE {scene_number} - {title.upper()} - {location.upper()}"
+        elif title:
+            scene_heading = f"SCENE {scene_number} - {title.upper()}"
+        elif location:
+            scene_heading = f"SCENE {scene_number} - {location.upper()}"
+        else:
+            scene_heading = f"SCENE {scene_number}"
         
         scene_para = self.document.add_paragraph(scene_heading, style='Scene Heading')
         
-        # Action/Description
+        # Action/Description (now combined with dialogue)
         action = scene_data.get('action', '')
         if action:
             action_para = self.document.add_paragraph(action, style='Action')
-        
-        # Characters and Dialogue
-        characters = scene_data.get('characters', '')
-        dialogue = scene_data.get('dialogue', '')
-        
-        if characters and dialogue:
-            # Split characters if multiple
-            char_list = [char.strip() for char in characters.split(',')]
-            
-            # Split dialogue into character parts (simple approach)
-            dialogue_parts = dialogue.split('\n')
-            
-            for i, char in enumerate(char_list):
-                if i < len(dialogue_parts):
-                    # Character name
-                    char_para = self.document.add_paragraph(char.upper(), style='Character')
-                    
-                    # Dialogue
-                    dialogue_text = dialogue_parts[i].strip()
-                    if dialogue_text:
-                        dialogue_para = self.document.add_paragraph(dialogue_text, style='Dialogue')
         
         # Notes (if any)
         notes = scene_data.get('notes', '')
