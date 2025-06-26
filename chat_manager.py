@@ -9,16 +9,22 @@ class ChatManager:
         self.chat_file = os.path.join(Config.SCRIPT_FILE_PATH, "chat_history.json")
         self.chat_history = self.load_chat_history()
     
-    def load_chat_history(self) -> List[Dict]:
+    def load_chat_history(self) -> Dict:
         """Load chat history from JSON file"""
         if os.path.exists(self.chat_file):
             try:
                 with open(self.chat_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    # Ensure we always return a dictionary
+                    if isinstance(data, dict):
+                        return data
+                    else:
+                        print(f"Warning: chat_history.json contains {type(data)}, expected dict. Resetting to empty dict.")
+                        return {}
             except Exception as e:
                 print(f"Error loading chat history: {e}")
-                return []
-        return []
+                return {}
+        return {}
     
     def save_chat_history(self):
         """Save chat history to JSON file"""
@@ -28,10 +34,21 @@ class ChatManager:
         except Exception as e:
             print(f"Error saving chat history: {e}")
     
-    def add_message(self, role: str, content: str, timestamp: str = None):
-        """Add a message to chat history"""
+    def get_user_chat_key(self, username: str, script_id: str = None) -> str:
+        """Get the key for user's chat history"""
+        if script_id:
+            return f"{username}_{script_id}"
+        return username
+    
+    def add_message(self, username: str, role: str, content: str, script_id: str = None, timestamp: str = None):
+        """Add a message to user's chat history"""
         if timestamp is None:
             timestamp = datetime.now().isoformat()
+        
+        chat_key = self.get_user_chat_key(username, script_id)
+        
+        if chat_key not in self.chat_history:
+            self.chat_history[chat_key] = []
         
         message = {
             'role': role,
@@ -39,17 +56,20 @@ class ChatManager:
             'timestamp': timestamp
         }
         
-        self.chat_history.append(message)
+        self.chat_history[chat_key].append(message)
         self.save_chat_history()
     
-    def get_chat_history(self) -> List[Dict]:
-        """Get all chat history"""
-        return self.chat_history
+    def get_chat_history(self, username: str, script_id: str = None) -> List[Dict]:
+        """Get user's chat history"""
+        chat_key = self.get_user_chat_key(username, script_id)
+        return self.chat_history.get(chat_key, [])
     
-    def clear_chat_history(self):
-        """Clear all chat history"""
-        self.chat_history = []
-        self.save_chat_history()
+    def clear_chat_history(self, username: str, script_id: str = None):
+        """Clear user's chat history"""
+        chat_key = self.get_user_chat_key(username, script_id)
+        if chat_key in self.chat_history:
+            self.chat_history[chat_key] = []
+            self.save_chat_history()
     
     def get_context_summary(self, character_manager, scene_manager, location_manager, username: str = None) -> str:
         """Get a summary of the current script context"""
@@ -76,7 +96,7 @@ class ChatManager:
         
         return " | ".join(summary) if summary else "No content created yet."
     
-    def get_full_context_for_ai(self, character_manager, scene_manager, location_manager, user_message: str, username: str = None) -> str:
+    def get_full_context_for_ai(self, character_manager, scene_manager, location_manager, user_message: str, username: str = None, script_id: str = None) -> str:
         """Get full context for AI processing"""
         if not username:
             return "No user context available."
@@ -109,7 +129,7 @@ class ChatManager:
             context_parts.append(loc_context)
         
         # Chat history context
-        chat_history = self.get_chat_history()
+        chat_history = self.get_chat_history(username, script_id)
         if chat_history:
             history_context = "RECENT CHAT HISTORY:\n"
             for message in chat_history[-5:]:  # Last 5 messages

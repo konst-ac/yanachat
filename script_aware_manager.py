@@ -64,19 +64,19 @@ class ScriptAwareManager:
             return self.update_script_data(username, 'characters', characters)
         return False
     
-    def search_characters(self, username: str, query: str) -> List[Dict]:
+    def search_characters(self, username: str, query: str) -> Dict:
         """Search characters in current script"""
         characters = self.get_script_data(username, 'characters')
         if not query:
-            return list(characters.values())
+            return characters
         
-        results = []
+        results = {}
         query_lower = query.lower()
-        for char in characters.values():
+        for char_id, char in characters.items():
             if (query_lower in char.get('name', '').lower() or 
                 query_lower in char.get('description', '').lower() or
                 query_lower in char.get('personality', '').lower()):
-                results.append(char)
+                results[char_id] = char
         return results
     
     def add_scene(self, username: str, scene_data: Dict) -> bool:
@@ -116,19 +116,19 @@ class ScriptAwareManager:
             return self.update_script_data(username, 'scenes', scenes)
         return False
     
-    def search_scenes(self, username: str, query: str) -> List[Dict]:
+    def search_scenes(self, username: str, query: str) -> Dict:
         """Search scenes in current script"""
         scenes = self.get_script_data(username, 'scenes')
         if not query:
-            return list(scenes.values())
+            return scenes
         
-        results = []
+        results = {}
         query_lower = query.lower()
-        for scene in scenes.values():
+        for scene_id, scene in scenes.items():
             if (query_lower in scene.get('title', '').lower() or 
                 query_lower in scene.get('action', '').lower() or
                 query_lower in scene.get('location', '').lower()):
-                results.append(scene)
+                results[scene_id] = scene
         return results
     
     def get_scene_statistics(self, username: str) -> Dict:
@@ -184,4 +184,19 @@ class ScriptAwareManager:
         if location_id in locations:
             del locations[location_id]
             return self.update_script_data(username, 'locations', locations)
-        return False 
+        return False
+    
+    def search_locations(self, username: str, query: str) -> Dict:
+        """Search locations in current script"""
+        locations = self.get_script_data(username, 'locations')
+        if not query:
+            return locations
+        
+        results = {}
+        query_lower = query.lower()
+        for location_id, location in locations.items():
+            if (query_lower in location.get('name', '').lower() or 
+                query_lower in location.get('description', '').lower() or
+                query_lower in location.get('type', '').lower()):
+                results[location_id] = location
+        return results 

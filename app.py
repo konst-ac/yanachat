@@ -80,7 +80,7 @@ with st.sidebar:
     selected = option_menu(
         menu_title="Navigation",
         options=["Script Manager", "Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
-        icons=["folder", "house", "person", "map-pin", "film", "list", "pencil", "graph-up", "chat"],
+        icons=["folder", "house", "person", "geo-alt", "film", "list", "pencil", "graph-up", "chat"],
         menu_icon="cast",
         default_index=0,
     )
@@ -155,6 +155,8 @@ st.markdown("""
         border-radius: 25px;
         padding: 0.5rem 2rem;
         font-weight: bold;
+        min-height: 44px;
+        font-size: 0.9rem;
     }
     .stButton > button:hover {
         background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
@@ -176,6 +178,32 @@ st.markdown("""
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .chat-suggestion-button {
+        background: transparent;
+        border: 1px solid #667eea;
+        color: #667eea;
+        border-radius: 10px;
+        padding: 4px 8px;
+        margin: 2px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .chat-suggestion-button:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .scene-action-button {
+        min-height: 44px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -346,10 +374,10 @@ elif selected == "Characters":
     if search_query:
         characters = script_aware_manager.search_characters(username, search_query)
     else:
-        characters = list(script_aware_manager.get_characters(username).values())
+        characters = script_aware_manager.get_characters(username)
     
     if characters:
-        for character in characters:
+        for character_id, character in characters.items():
             with st.container():
                 st.markdown(f"""
                 <div class="character-card">
@@ -363,18 +391,18 @@ elif selected == "Characters":
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    if st.button(f"Edit {character.get('name')}", key=f"edit_{character.get('id')}"):
-                        st.session_state.editing_character = character.get('id')
+                    if st.button(f"Edit {character.get('name')}", key=f"edit_{character_id}"):
+                        st.session_state.editing_character = character_id
                 
                 with col2:
-                    if st.button(f"Analyze {character.get('name')}", key=f"analyze_{character.get('id')}"):
+                    if st.button(f"Analyze {character.get('name')}", key=f"analyze_{character_id}"):
                         with st.spinner("Analyzing character..."):
                             analysis = llm_client.analyze_character(character)
                             st.text_area("Character Analysis", analysis, height=300)
                 
                 with col3:
-                    if st.button(f"Delete {character.get('name')}", key=f"delete_{character.get('id')}"):
-                        if script_aware_manager.delete_character(username, character.get('id')):
+                    if st.button(f"Delete {character.get('name')}", key=f"delete_{character_id}"):
+                        if script_aware_manager.delete_character(username, character_id):
                             st.success(f"Character '{character.get('name')}' deleted!")
                             st.rerun()
                         else:
@@ -429,24 +457,25 @@ elif selected == "Locations":
                     st.error("Please enter a location name.")
     
     # Location list and management
-    st.subheader("📋 Location List")
+    st.subheader("🗺️ Location List")
     
     # Search functionality
-    search_query = st.text_input("🔍 Search locations...")
+    location_search = st.text_input("🔍 Search locations...")
     
-    if search_query:
-        locations = script_aware_manager.search_locations(username, search_query)
+    if location_search:
+        locations = script_aware_manager.search_locations(username, location_search)
     else:
-        locations = list(script_aware_manager.get_locations(username).values())
+        locations = script_aware_manager.get_locations(username)
     
     if locations:
-        for location in locations:
+        for location_id, location in locations.items():
             with st.container():
                 st.markdown(f"""
-                <div class="character-card">
-                    <h3>{location.get('name', 'Unknown')}</h3>
+                <div class="location-card">
+                    <h3>{location.get('name', 'No name')}</h3>
                     <p><strong>Description:</strong> {location.get('description', 'No description')}</p>
-                    <p><strong>Objects:</strong> {', '.join(location.get('objects', []))}</p>
+                    <p><strong>Objects:</strong> {', '.join(location.get('objects', [])) if isinstance(location.get('objects', []), list) else location.get('objects', 'No objects')}</p>
+                    <p><strong>Type:</strong> {location.get('type', 'No type')}</p>
                     <p><strong>Lighting:</strong> {location.get('lighting', 'No lighting info')}</p>
                     <p><strong>Time:</strong> {location.get('date_time', 'No time info')}</p>
                 </div>
@@ -455,11 +484,11 @@ elif selected == "Locations":
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    if st.button(f"Edit {location.get('name')}", key=f"edit_loc_{location.get('id')}"):
-                        st.session_state.editing_location = location.get('id')
+                    if st.button(f"Edit {location.get('name')}", key=f"edit_loc_{location_id}"):
+                        st.session_state.editing_location = location_id
                 
                 with col2:
-                    if st.button(f"View Scenes {location.get('name')}", key=f"view_scenes_{location.get('id')}"):
+                    if st.button(f"View Scenes {location.get('name')}", key=f"view_scenes_{location_id}"):
                         scenes = script_aware_manager.search_scenes(username, location.get('name'))
                         if scenes:
                             st.subheader(f"Scenes in {location.get('name')}")
@@ -469,8 +498,8 @@ elif selected == "Locations":
                             st.info(f"No scenes set in {location.get('name')}")
                 
                 with col3:
-                    if st.button(f"Delete {location.get('name')}", key=f"delete_loc_{location.get('id')}"):
-                        if script_aware_manager.delete_location(username, location.get('id')):
+                    if st.button(f"Delete {location.get('name')}", key=f"delete_loc_{location_id}"):
+                        if script_aware_manager.delete_location(username, location_id):
                             st.success(f"Location '{location.get('name')}' deleted!")
                             st.rerun()
                         else:
@@ -593,10 +622,10 @@ elif selected == "Scenes":
     if scene_search:
         scenes = script_aware_manager.search_scenes(username, scene_search)
     else:
-        scenes = script_aware_manager.get_scene_sequence(username)
+        scenes = script_aware_manager.get_scenes(username)
     
     if scenes:
-        for scene in scenes:
+        for scene_id, scene in scenes.items():
             with st.container():
                 st.markdown(f"""
                 <div class="scene-card">
@@ -613,17 +642,17 @@ elif selected == "Scenes":
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
-                    if st.button(f"Edit Scene {scene.get('scene_number')}", key=f"edit_scene_{scene.get('id')}"):
-                        st.session_state.editing_scene = scene.get('id')
+                    if st.button(f"Edit Scene {scene.get('scene_number')}", key=f"edit_scene_{scene_id}"):
+                        st.session_state.editing_scene = scene_id
                 
                 with col2:
-                    if st.button(f"Analyze Scene {scene.get('scene_number')}", key=f"analyze_scene_{scene.get('id')}"):
+                    if st.button(f"Analyze Scene {scene.get('scene_number')}", key=f"analyze_scene_{scene_id}"):
                         with st.spinner("Analyzing scene..."):
                             analysis = llm_client.analyze_scene(scene)
                             st.text_area("Scene Analysis", analysis, height=300)
                 
                 with col3:
-                    if st.button(f"Export Scene {scene.get('scene_number')}", key=f"export_scene_{scene.get('id')}"):
+                    if st.button(f"Export Scene {scene.get('scene_number')}", key=f"export_scene_{scene_id}"):
                         try:
                             filepath = word_exporter.export_single_scene(scene)
                             with open(filepath, 'rb') as f:
@@ -632,15 +661,15 @@ elif selected == "Scenes":
                                     data=f.read(),
                                     file_name=os.path.basename(filepath),
                                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    key=f"download_scene_{scene.get('id')}"
+                                    key=f"download_scene_{scene_id}"
                                 )
                             st.success("Scene exported!")
                         except Exception as e:
                             st.error(f"Error exporting: {str(e)}")
                 
                 with col4:
-                    if st.button(f"Delete Scene {scene.get('scene_number')}", key=f"delete_scene_{scene.get('id')}"):
-                        if script_aware_manager.delete_scene(username, scene.get('id')):
+                    if st.button(f"Delete Scene {scene.get('scene_number')}", key=f"delete_scene_{scene_id}"):
+                        if script_aware_manager.delete_scene(username, scene_id):
                             st.success(f"Scene {scene.get('scene_number')} deleted!")
                             st.rerun()
                         else:
@@ -857,8 +886,11 @@ elif selected == "Script Analysis":
 elif selected == "Chat":
     st.markdown('<h1 class="section-header">💬 Chat with Yana</h1>', unsafe_allow_html=True)
     
+    # Get current script ID for chat context
+    script_id = st.session_state.get('current_script_id', None)
+    
     # Display chat history
-    chat_history = chat_manager.get_chat_history()
+    chat_history = chat_manager.get_chat_history(username, script_id)
     
     if chat_history:
         st.subheader("📝 Chat History")
@@ -878,19 +910,19 @@ elif selected == "Chat":
     
     # Chat input
     with st.form("chat_form"):
-        # Use suggestion from session state if available
-        default_value = st.session_state.get('chat_suggestion', '')
-        user_input = st.text_area("💬 Ask me anything about your script:", 
-                                 value=default_value,
-                                 height=100, 
-                                 placeholder="e.g., 'How can I improve the dialogue in Scene 2?' or 'What conflicts would work well for my protagonist?'")
+        user_input = st.text_area(
+            "Ask Yana about your script, characters, scenes, or get writing advice:",
+            height=100,
+            placeholder="How can I improve my protagonist's character arc?",
+            value=st.session_state.get('chat_suggestion', '')
+        )
         
-        col1, col2 = st.columns([1, 4])
+        col1, col2 = st.columns([3, 1])
         with col1:
-            send_button = st.form_submit_button("Send", type="primary")
+            submitted = st.form_submit_button("Send Message", type="primary")
         with col2:
             if st.form_submit_button("Clear Chat History"):
-                chat_manager.clear_chat_history()
+                chat_manager.clear_chat_history(username, script_id)
                 st.rerun()
     
     # Show context summary
@@ -907,20 +939,19 @@ elif selected == "Chat":
             st.info("No characters or scenes created yet. Start by adding some content!")
     
     # Chat suggestions
-    st.subheader("💡 Chat Suggestions")
-    suggestions = [
-        "How can I improve the pacing of my script?",
-        "What conflicts would work well for my protagonist?",
-        "How can I make the dialogue more natural?",
-        "What visual elements should I add to Scene 3?",
-        "How can I develop my antagonist further?",
-        "What plot holes should I watch out for?"
-    ]
-    
-    cols = st.columns(2)
-    for i, suggestion in enumerate(suggestions):
-        with cols[i % 2]:
-            if st.button(suggestion, key=f"suggestion_{i}"):
+    with st.expander("💡 Chat Suggestions", expanded=False):
+        suggestions = [
+            "How can I improve the pacing of my script?",
+            "What conflicts would work well for my protagonist?",
+            "How can I make the dialogue more natural?",
+            "What visual elements should I add to Scene 3?",
+            "How can I develop my antagonist further?",
+            "What plot holes should I watch out for?"
+        ]
+        
+        # Use smaller buttons in a more compact layout
+        for i, suggestion in enumerate(suggestions):
+            if st.button(suggestion, key=f"suggestion_{i}", help="Click to use this suggestion"):
                 # Set the suggestion in session state and rerun to populate the form
                 st.session_state.chat_suggestion = suggestion
                 st.rerun()
@@ -934,51 +965,42 @@ elif selected == "Chat":
     if 'chat_suggestion' in st.session_state:
         del st.session_state.chat_suggestion
     
-    if send_button and user_input:
-        # Add user message to history
-        chat_manager.add_message('user', user_input)
+    # Process chat input
+    if submitted and user_input.strip():
+        # Add user message to chat history
+        chat_manager.add_message(username, 'user', user_input, script_id)
         
-        # Check if user is asking a question
-        question_indicators = ['?', 'how', 'what', 'why', 'when', 'where', 'who', 'which', 'can you', 'could you', 'would you', 'please']
-        is_question = any(indicator in user_input.lower() for indicator in question_indicators)
+        # Show user message immediately
+        st.markdown(f"""
+        <div class="chat-message-user">
+            <strong>You:</strong> {user_input}
+        </div>
+        """, unsafe_allow_html=True)
         
-        if is_question:
-            # Get context and generate response
+        # Get AI response with context
+        with st.spinner("Yana is thinking..."):
             context = chat_manager.get_full_context_for_ai(
-                character_manager=script_aware_manager, 
-                scene_manager=script_aware_manager, 
-                location_manager=script_aware_manager, 
-                user_message=user_input, 
-                username=username
+                character_manager=script_aware_manager,
+                scene_manager=script_aware_manager,
+                location_manager=script_aware_manager,
+                user_message=user_input,
+                username=username,
+                script_id=script_id
             )
             
-            with st.spinner("🤔 Yana is thinking..."):
-                ai_response = llm_client.chat_with_context(user_input, context)
-                
-                # Add AI response to history
-                chat_manager.add_message('assistant', ai_response)
-                
-                # Display the response
-                st.markdown(f"""
-                <div class="chat-message-ai">
-                    <h4>🎬 Yana's Response:</h4>
-                    {ai_response}
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.rerun()
-        else:
-            # If not a question, just acknowledge
-            ai_response = "I'm here to help! Feel free to ask me any questions about your script, characters, scenes, or writing process."
-            chat_manager.add_message('assistant', ai_response)
+            ai_response = llm_client.chat_with_context(user_input, context)
             
+            # Add AI response to chat history
+            chat_manager.add_message(username, 'assistant', ai_response, script_id)
+            
+            # Show AI response
             st.markdown(f"""
             <div class="chat-message-ai">
-                <h4>🎬 Yana's Response:</h4>
-                {ai_response}
+                <strong>Yana:</strong> {ai_response}
             </div>
             """, unsafe_allow_html=True)
             
+            # Rerun to update chat history display
             st.rerun()
 
 # Footer
