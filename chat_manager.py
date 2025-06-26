@@ -51,58 +51,70 @@ class ChatManager:
         self.chat_history = []
         self.save_chat_history()
     
-    def get_context_summary(self, character_manager, scene_manager, location_manager) -> str:
-        """Generate a context summary from characters, scenes, and locations for AI memory"""
+    def get_context_summary(self, character_manager, scene_manager, location_manager, username: str = None) -> str:
+        """Get a summary of the current script context"""
+        if not username:
+            return "No user context available."
+        
+        characters = character_manager.get_characters(username)
+        scenes = scene_manager.get_scene_sequence(username)
+        locations = location_manager.get_locations(username)
+        
+        summary = []
+        
+        if characters:
+            char_names = [char.get('name', 'Unknown') for char in characters.values()]
+            summary.append(f"Characters: {', '.join(char_names)}")
+        
+        if scenes:
+            scene_titles = [f"Scene {scene.get('scene_number', 'N/A')}: {scene.get('title', 'No title')}" for scene in scenes]
+            summary.append(f"Scenes: {', '.join(scene_titles)}")
+        
+        if locations:
+            loc_names = [loc.get('name', 'Unknown') for loc in locations.values()]
+            summary.append(f"Locations: {', '.join(loc_names)}")
+        
+        return " | ".join(summary) if summary else "No content created yet."
+    
+    def get_full_context_for_ai(self, character_manager, scene_manager, location_manager, user_message: str, username: str = None) -> str:
+        """Get full context for AI processing"""
+        if not username:
+            return "No user context available."
+        
+        characters = character_manager.get_characters(username)
+        scenes = scene_manager.get_scene_sequence(username)
+        locations = location_manager.get_locations(username)
+        
         context_parts = []
         
-        # Add character information
-        characters = character_manager.get_all_characters()
+        # Character context
         if characters:
-            context_parts.append("CHARACTERS:")
-            for char_id, char in characters.items():
-                char_info = f"- {char.get('name', 'Unknown')} (Age: {char.get('age', 'Unknown')}): {char.get('description', 'No description')}. Personality: {char.get('personality', 'No personality')}. Goals: {char.get('goals', 'No goals')}. Conflicts: {char.get('conflicts', 'No conflicts')}"
-                context_parts.append(char_info)
+            char_context = "CHARACTERS:\n"
+            for char in characters.values():
+                char_context += f"- {char.get('name', 'Unknown')}: {char.get('description', 'No description')}\n"
+            context_parts.append(char_context)
         
-        # Add location information
-        locations = location_manager.get_all_locations()
-        if locations:
-            context_parts.append("\nLOCATIONS:")
-            for loc_id, loc in locations.items():
-                objects_str = ', '.join(loc.get('objects', []))
-                loc_info = f"- {loc.get('name', 'Unknown')}: {loc.get('description', 'No description')}. Objects: {objects_str}. Lighting: {loc.get('lighting', 'No lighting info')}. Time: {loc.get('date_time', 'No time info')}"
-                context_parts.append(loc_info)
-        
-        # Add scene information
-        scenes = scene_manager.get_scene_sequence()
+        # Scene context
         if scenes:
-            context_parts.append("\nSCENES:")
+            scene_context = "SCENES:\n"
             for scene in scenes:
-                characters_str = ', '.join(scene.get('characters', [])) if isinstance(scene.get('characters', []), list) else scene.get('characters', 'None')
-                tone_str = ', '.join(scene.get('tone_mood', [])) if isinstance(scene.get('tone_mood', []), list) else scene.get('tone_mood', 'None')
-                scene_info = f"- Scene {scene.get('scene_number', 'N/A')} ({scene.get('title', 'No title')}): Location: {scene.get('location', 'No location')}. Time: {scene.get('time_of_day', 'No time')}. Characters: {characters_str}. Tone: {tone_str}. Goal: {scene.get('goal', 'No goal')}. Content: {scene.get('action', 'No content')[:200]}..."
-                context_parts.append(scene_info)
+                scene_context += f"- Scene {scene.get('scene_number', 'N/A')}: {scene.get('title', 'No title')} at {scene.get('location', 'Unknown location')}\n"
+            context_parts.append(scene_context)
         
-        # Add recent chat context
-        if self.chat_history:
-            context_parts.append("\nRECENT CONVERSATION:")
-            recent_messages = self.chat_history[-6:]  # Last 6 messages
-            for msg in recent_messages:
-                role = "You" if msg['role'] == 'user' else "AI"
-                context_parts.append(f"{role}: {msg['content'][:150]}...")
+        # Location context
+        if locations:
+            loc_context = "LOCATIONS:\n"
+            for loc in locations.values():
+                loc_context += f"- {loc.get('name', 'Unknown')}: {loc.get('description', 'No description')}\n"
+            context_parts.append(loc_context)
         
-        return "\n".join(context_parts)
-    
-    def get_full_context_for_ai(self, character_manager, scene_manager, location_manager, user_message: str) -> str:
-        """Get full context including characters, scenes, locations, and chat history for AI"""
-        context = self.get_context_summary(character_manager, scene_manager, location_manager)
+        # Chat history context
+        chat_history = self.get_chat_history()
+        if chat_history:
+            history_context = "RECENT CHAT HISTORY:\n"
+            for message in chat_history[-5:]:  # Last 5 messages
+                role = "User" if message['role'] == 'user' else "Assistant"
+                history_context += f"- {role}: {message['content'][:100]}...\n"
+            context_parts.append(history_context)
         
-        full_context = f"""
-You are an expert screenwriting assistant for a filmmaker. You have access to the following information about their script:
-
-{context}
-
-Current user message: {user_message}
-
-Please respond as a helpful screenwriting assistant, using the context above to provide relevant, personalized advice about their script, characters, scenes, and locations.
-"""
-        return full_context 
+        return "\n\n".join(context_parts) if context_parts else "No context available." 

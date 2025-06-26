@@ -13,6 +13,12 @@ class SceneGenerator:
         """Render the main scene generator interface"""
         st.markdown('<h1 class="section-header">🎬 Scene Generator</h1>', unsafe_allow_html=True)
         
+        # Get current username from session state
+        username = st.session_state.get('username', '')
+        if not username:
+            st.error("User not authenticated!")
+            return
+        
         # Initialize session state for scene data
         if 'current_scene' not in st.session_state:
             st.session_state.current_scene = {
@@ -32,18 +38,18 @@ class SceneGenerator:
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            self.render_scene_overview_panel()
+            self.render_scene_overview_panel(username)
             self.render_script_editor()
         
         with col2:
             self.render_prompt_assistant_sidebar()
             self.render_storyboard_panel()
-            self.render_scene_notes_panel()
+            self.render_scene_notes_panel(username)
         
         # Action buttons at the bottom
-        self.render_action_buttons()
+        self.render_action_buttons(username)
     
-    def render_scene_overview_panel(self):
+    def render_scene_overview_panel(self, username: str):
         """Render the Scene Overview Panel"""
         st.markdown('<h3 class="section-header">📋 Scene Overview</h3>', unsafe_allow_html=True)
         
@@ -56,7 +62,7 @@ class SceneGenerator:
             )
             
             # Location Selector
-            locations = self.location_manager.get_location_names()
+            locations = self.location_manager.get_location_names(username)
             if locations:
                 selected_location = st.selectbox(
                     "Location",
@@ -92,7 +98,7 @@ class SceneGenerator:
             st.session_state.current_scene['tone_mood'] = selected_tones
             
             # Characters Involved
-            characters = self.character_manager.get_character_names()
+            characters = self.character_manager.get_character_names(username)
             if characters:
                 selected_characters = st.multiselect(
                     "Characters Involved",
@@ -152,7 +158,7 @@ class SceneGenerator:
             # Placeholder for storyboard frames
             st.info("Storyboard frames will appear here once generated.")
     
-    def render_scene_notes_panel(self):
+    def render_scene_notes_panel(self, username: str):
         """Render the Scene Notes / Metadata Panel"""
         st.markdown('<h3 class="section-header">📝 Scene Notes</h3>', unsafe_allow_html=True)
         
@@ -194,7 +200,7 @@ class SceneGenerator:
             
             # Links to Other Scenes
             st.subheader("Links to Other Scenes")
-            scenes = self.scene_manager.get_all_scenes()
+            scenes = self.scene_manager.get_all_scenes(username)
             if scenes:
                 scene_options = [f"Scene {s.get('scene_number', 'N/A')}: {s.get('title', 'No title')}" 
                                for s in scenes.values()]
@@ -207,7 +213,7 @@ class SceneGenerator:
             else:
                 st.info("No other scenes to link to yet.")
     
-    def render_action_buttons(self):
+    def render_action_buttons(self, username: str):
         """Render action buttons at the bottom"""
         st.markdown("---")
         
@@ -215,7 +221,7 @@ class SceneGenerator:
         
         with col1:
             if st.button("💾 Save Scene", type="primary"):
-                self.save_scene()
+                self.save_scene(username)
         
         with col2:
             if st.button("🔄 Clear Form"):
@@ -279,20 +285,20 @@ class SceneGenerator:
             )
             st.info(f"**Next Action Suggestion:**\n{suggestion}")
     
-    def save_scene(self):
+    def save_scene(self, username: str):
         """Save the current scene"""
         if not st.session_state.current_scene['title']:
             st.error("Please provide a scene title!")
             return
         
         # Get next scene number
-        existing_scenes = self.scene_manager.get_all_scenes()
+        existing_scenes = self.scene_manager.get_all_scenes(username)
         next_scene_number = len(existing_scenes) + 1
         
         scene_data = st.session_state.current_scene.copy()
         scene_data['scene_number'] = next_scene_number
         
-        if self.scene_manager.add_scene(scene_data):
+        if self.scene_manager.add_scene(username, scene_data):
             st.success(f"Scene '{scene_data['title']}' saved successfully!")
             # Clear the form
             st.session_state.current_scene = {

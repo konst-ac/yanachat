@@ -72,15 +72,15 @@ else:
     st.info("Please create or select a script to continue!")
     st.stop()
 
-# Initialize managers (keeping original for compatibility)
+# Initialize managers (keeping original for compatibility with other features)
 @st.cache_resource
 def get_managers():
     return CharacterManager(), SceneManager(), LocationManager(), TextModifier(), LLMClient(), ChatManager(), WordExporter()
 
 character_manager, scene_manager, location_manager, text_modifier, llm_client, chat_manager, word_exporter = get_managers()
 
-# Initialize scene generator
-scene_generator = SceneGenerator(character_manager, scene_manager, location_manager, llm_client)
+# Initialize scene generator with script-aware manager
+scene_generator = SceneGenerator(script_aware_manager, script_aware_manager, script_aware_manager, llm_client)
 
 # Sidebar navigation
 with st.sidebar:
@@ -203,7 +203,7 @@ if selected == "Dashboard":
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        stats = scene_manager.get_scene_statistics()
+        stats = script_aware_manager.get_scene_statistics(username)
         st.markdown(f"""
         <div class="metric-card">
             <h3>📊 Total Scenes</h3>
@@ -240,7 +240,7 @@ if selected == "Dashboard":
     st.markdown('<h2 class="section-header">Recent Activity</h2>', unsafe_allow_html=True)
     
     # Quick export section
-    scenes = scene_manager.get_scene_sequence()
+    scenes = script_aware_manager.get_scene_sequence(username)
     if scenes:
         st.subheader("📄 Quick Export")
         col1, col2 = st.columns(2)
@@ -248,7 +248,7 @@ if selected == "Dashboard":
         with col1:
             if st.button("📥 Export All Scenes to Word", type="primary"):
                 try:
-                    characters = list(character_manager.get_all_characters().values())
+                    characters = list(script_aware_manager.get_characters(username).values())
                     filepath = word_exporter.export_scenes_to_word(scenes, characters, "My Screenplay", "Screenwriter")
                     
                     with open(filepath, 'rb') as f:
@@ -267,22 +267,13 @@ if selected == "Dashboard":
     else:
         # Sample data generation
         st.subheader("🎬 Get Started")
-        st.info("No scenes created yet. Generate sample data to test the Word export feature!")
-        
-        if st.button("🎭 Generate Sample Data", type="primary"):
-            try:
-                char_count, scene_count, loc_count = add_sample_data_to_managers(character_manager, scene_manager, location_manager)
-                st.success(f"✅ Generated {char_count} characters, {scene_count} scenes, and {loc_count} locations!")
-                st.info("🎬 Sample thriller script created: 'The Investigation' - A journalist uncovers government corruption")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error generating sample data: {str(e)}")
+        st.info("No scenes created yet. Start by adding your first scene!")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.subheader("📝 Recent Scenes")
-        scenes = scene_manager.get_scene_sequence()
+        scenes = script_aware_manager.get_scene_sequence(username)
         if scenes:
             for scene in scenes[-3:]:
                 with st.expander(f"Scene {scene.get('scene_number', 'N/A')}: {scene.get('title', 'No title')}"):
@@ -294,7 +285,7 @@ if selected == "Dashboard":
     
     with col2:
         st.subheader("👥 Recent Characters")
-        characters = character_manager.get_all_characters()
+        characters = script_aware_manager.get_characters(username)
         if characters:
             for char_id, char in list(characters.items())[-3:]:
                 with st.expander(f"{char.get('name', 'Unknown')}"):
@@ -333,7 +324,7 @@ elif selected == "Characters":
                         'conflicts': conflicts
                     }
                     
-                    if character_manager.add_character(character_data):
+                    if script_aware_manager.add_character(username, character_data):
                         st.success(f"Character '{name}' added successfully!")
                         st.rerun()
                     else:
@@ -348,9 +339,9 @@ elif selected == "Characters":
     search_query = st.text_input("🔍 Search characters...")
     
     if search_query:
-        characters = character_manager.search_characters(search_query)
+        characters = script_aware_manager.search_characters(username, search_query)
     else:
-        characters = list(character_manager.get_all_characters().values())
+        characters = list(script_aware_manager.get_characters(username).values())
     
     if characters:
         for character in characters:
@@ -378,7 +369,7 @@ elif selected == "Characters":
                 
                 with col3:
                     if st.button(f"Delete {character.get('name')}", key=f"delete_{character.get('id')}"):
-                        if character_manager.delete_character(character.get('id')):
+                        if script_aware_manager.delete_character(username, character.get('id')):
                             st.success(f"Character '{character.get('name')}' deleted!")
                             st.rerun()
                         else:
@@ -424,7 +415,7 @@ elif selected == "Locations":
                         'type': location_type
                     }
                     
-                    if location_manager.add_location(location_data):
+                    if script_aware_manager.add_location(username, location_data):
                         st.success(f"Location '{name}' added successfully!")
                         st.rerun()
                     else:
@@ -439,9 +430,9 @@ elif selected == "Locations":
     search_query = st.text_input("🔍 Search locations...")
     
     if search_query:
-        locations = location_manager.search_locations(search_query)
+        locations = script_aware_manager.search_locations(username, search_query)
     else:
-        locations = list(location_manager.get_all_locations().values())
+        locations = list(script_aware_manager.get_locations(username).values())
     
     if locations:
         for location in locations:
@@ -464,7 +455,7 @@ elif selected == "Locations":
                 
                 with col2:
                     if st.button(f"View Scenes {location.get('name')}", key=f"view_scenes_{location.get('id')}"):
-                        scenes = scene_manager.get_scenes_by_location(location.get('name'))
+                        scenes = script_aware_manager.search_scenes(username, location.get('name'))
                         if scenes:
                             st.subheader(f"Scenes in {location.get('name')}")
                             for scene in scenes:
@@ -474,7 +465,7 @@ elif selected == "Locations":
                 
                 with col3:
                     if st.button(f"Delete {location.get('name')}", key=f"delete_loc_{location.get('id')}"):
-                        if location_manager.delete_location(location.get('id')):
+                        if script_aware_manager.delete_location(username, location.get('id')):
                             st.success(f"Location '{location.get('name')}' deleted!")
                             st.rerun()
                         else:
@@ -504,7 +495,7 @@ elif selected == "Scenes":
         
         with col1:
             st.subheader("Export Single Scene")
-            scenes = scene_manager.get_scene_sequence()
+            scenes = script_aware_manager.get_scene_sequence(username)
             if scenes:
                 scene_options = [f"Scene {s.get('scene_number', 'N/A')}: {s.get('title', 'No title')}" for s in scenes]
                 selected_scene_index = st.selectbox("Select scene to export:", range(len(scenes)), format_func=lambda x: scene_options[x])
@@ -536,7 +527,7 @@ elif selected == "Scenes":
                 
                 if st.button("Export Full Script"):
                     try:
-                        characters = list(character_manager.get_all_characters().values())
+                        characters = list(script_aware_manager.get_characters(username).values())
                         filepath = word_exporter.export_scenes_to_word(scenes, characters, title, author)
                         
                         # Read the file for download
@@ -566,7 +557,7 @@ elif selected == "Scenes":
                 tone_mood = st.multiselect("Tone/Mood", ["tense", "hopeful", "bleak", "warm", "suspenseful", "comedic", "dramatic", "romantic", "dark", "lighthearted"])
             
             with col2:
-                characters = st.multiselect("Characters", character_manager.get_character_names())
+                characters = st.multiselect("Characters", script_aware_manager.get_character_names(username))
                 action = st.text_area("Script Content (Action & Dialogue)")
                 goal = st.text_area("Goal of the Scene")
             
@@ -582,7 +573,7 @@ elif selected == "Scenes":
                     'goal': goal
                 }
                 
-                if scene_manager.add_scene(scene_data):
+                if script_aware_manager.add_scene(username, scene_data):
                     st.success(f"Scene {scene_number} added successfully!")
                     st.rerun()
                 else:
@@ -595,9 +586,9 @@ elif selected == "Scenes":
     scene_search = st.text_input("🔍 Search scenes...")
     
     if scene_search:
-        scenes = scene_manager.search_scenes(scene_search)
+        scenes = script_aware_manager.search_scenes(username, scene_search)
     else:
-        scenes = scene_manager.get_scene_sequence()
+        scenes = script_aware_manager.get_scene_sequence(username)
     
     if scenes:
         for scene in scenes:
@@ -644,7 +635,7 @@ elif selected == "Scenes":
                 
                 with col4:
                     if st.button(f"Delete Scene {scene.get('scene_number')}", key=f"delete_scene_{scene.get('id')}"):
-                        if scene_manager.delete_scene(scene.get('id')):
+                        if script_aware_manager.delete_scene(username, scene.get('id')):
                             st.success(f"Scene {scene.get('scene_number')} deleted!")
                             st.rerun()
                         else:
@@ -760,8 +751,8 @@ elif selected == "Script Analysis":
     # Overall statistics
     st.subheader("📈 Overall Statistics")
     
-    stats = scene_manager.get_scene_statistics()
-    characters = character_manager.get_all_characters()
+    stats = script_aware_manager.get_scene_statistics(username)
+    characters = script_aware_manager.get_characters(username)
     
     col1, col2 = st.columns(2)
     
@@ -787,7 +778,7 @@ elif selected == "Script Analysis":
         # Location analysis
         st.subheader("📍 Location Analysis")
         
-        locations = location_manager.get_all_locations()
+        locations = script_aware_manager.get_all_locations(username)
         if locations:
             loc_data = []
             for loc in locations.values():
@@ -805,7 +796,7 @@ elif selected == "Script Analysis":
     # Scene analysis
     st.subheader("🎬 Scene Analysis")
     
-    scenes = scene_manager.get_scene_sequence()
+    scenes = script_aware_manager.get_scene_sequence(username)
     if scenes:
         scene_data = []
         for scene in scenes:
@@ -897,6 +888,38 @@ elif selected == "Chat":
                 chat_manager.clear_chat_history()
                 st.rerun()
     
+    # Show context summary
+    with st.expander("📋 Current Script Context"):
+        context_summary = chat_manager.get_context_summary(script_aware_manager, script_aware_manager, script_aware_manager, username)
+        if context_summary:
+            st.text(context_summary)
+        else:
+            st.info("No characters or scenes created yet. Start by adding some content!")
+    
+    # Chat suggestions
+    st.subheader("💡 Chat Suggestions")
+    suggestions = [
+        "How can I improve the pacing of my script?",
+        "What conflicts would work well for my protagonist?",
+        "How can I make the dialogue more natural?",
+        "What visual elements should I add to Scene 3?",
+        "How can I develop my antagonist further?",
+        "What plot holes should I watch out for?"
+    ]
+    
+    cols = st.columns(2)
+    for i, suggestion in enumerate(suggestions):
+        with cols[i % 2]:
+            if st.button(suggestion, key=f"suggestion_{i}"):
+                # Set the suggestion in session state and rerun to populate the form
+                st.session_state.chat_suggestion = suggestion
+                st.rerun()
+    
+    # Check if there's a suggestion to populate
+    if 'chat_suggestion' in st.session_state and st.session_state.chat_suggestion:
+        # This will be handled in the form above
+        pass
+    
     # Clear the suggestion after it's been used
     if 'chat_suggestion' in st.session_state:
         del st.session_state.chat_suggestion
@@ -911,7 +934,7 @@ elif selected == "Chat":
         
         if is_question:
             # Get context and generate response
-            context = chat_manager.get_full_context_for_ai(character_manager, scene_manager, location_manager, user_input)
+            context = chat_manager.get_full_context_for_ai(script_aware_manager, script_aware_manager, script_aware_manager, user_input, username)
             
             with st.spinner("🤔 Yana is thinking..."):
                 ai_response = llm_client.chat_with_context(user_input, context)
@@ -941,38 +964,6 @@ elif selected == "Chat":
             """, unsafe_allow_html=True)
             
             st.rerun()
-    
-    # Show context summary
-    with st.expander("📋 Current Script Context"):
-        context_summary = chat_manager.get_context_summary(character_manager, scene_manager, location_manager)
-        if context_summary:
-            st.text(context_summary)
-        else:
-            st.info("No characters or scenes created yet. Start by adding some content!")
-    
-    # Chat suggestions
-    st.subheader("💡 Chat Suggestions")
-    suggestions = [
-        "How can I improve the pacing of my script?",
-        "What conflicts would work well for my protagonist?",
-        "How can I make the dialogue more natural?",
-        "What visual elements should I add to Scene 3?",
-        "How can I develop my antagonist further?",
-        "What plot holes should I watch out for?"
-    ]
-    
-    cols = st.columns(2)
-    for i, suggestion in enumerate(suggestions):
-        with cols[i % 2]:
-            if st.button(suggestion, key=f"suggestion_{i}"):
-                # Set the suggestion in session state and rerun to populate the form
-                st.session_state.chat_suggestion = suggestion
-                st.rerun()
-    
-    # Check if there's a suggestion to populate
-    if 'chat_suggestion' in st.session_state and st.session_state.chat_suggestion:
-        # This will be handled in the form above
-        pass
 
 # Footer
 st.markdown("---")
