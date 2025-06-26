@@ -8,7 +8,6 @@ class ScriptSelector:
     
     def render_script_selector(self, username: str) -> Optional[str]:
         """Render script selector and return selected script ID"""
-        st.markdown('<h2 class="section-header">📚 Script Manager</h2>', unsafe_allow_html=True)
         
         # Get user's scripts
         user_scripts = self.user_manager.get_user_scripts(username)
@@ -93,9 +92,14 @@ class ScriptSelector:
         
         st.subheader("⚙️ Script Actions")
         
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
+            if st.button("🎬 Create New Script", type="primary"):
+                st.session_state.show_create_script = True
+                st.rerun()
+        
+        with col2:
             if st.button("🗑️ Delete Script", type="secondary"):
                 if st.checkbox("I'm sure I want to delete this script"):
                     if self.user_manager.delete_script(username, script_id):
@@ -104,7 +108,7 @@ class ScriptSelector:
                     else:
                         st.error("Error deleting script!")
         
-        with col2:
+        with col3:
             if st.button("📝 Rename Script", type="secondary"):
                 script = self.user_manager.get_script(username, script_id)
                 if script:

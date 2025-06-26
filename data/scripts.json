@@ -5,9 +5,26 @@
       "name": "Yanochka Script",
       "description": "bebebebebe",
       "created_at": "2025-06-26T16:11:04.332363",
-      "last_modified": "2025-06-26T16:11:04.332373",
+      "last_modified": "2025-06-26T17:14:59.466867",
       "characters": {},
-      "scenes": {},
+      "scenes": {
+        "1": {
+          "title": "1",
+          "location": "1",
+          "time_of_day": "Morning",
+          "tone_mood": [
+            "hopeful"
+          ],
+          "characters": [],
+          "action": "1",
+          "beats": [],
+          "goal": "",
+          "conflict_stakes": "",
+          "links_to_scenes": [],
+          "scene_number": 1,
+          "id": "1"
+        }
+      },
       "locations": {}
     }
   ]

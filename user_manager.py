@@ -143,4 +143,135 @@ class UserManager:
     
     def user_exists(self, username: str) -> bool:
         """Check if user exists"""
-        return username in self.users 
+        return username in self.users
+    
+    def create_test_user_with_sample_data(self):
+        """Create Test user with sample data"""
+        # Create Test user if it doesn't exist
+        if not self.user_exists("Test"):
+            self.register_user("Test", "test123", "test@example.com")
+        
+        # Create a sample script
+        script_id = self.create_script("Test", "The Investigation", "A journalist uncovers government corruption")
+        
+        # Sample characters
+        characters = {
+            "1": {
+                "name": "Sarah Chen",
+                "age": 32,
+                "description": "Investigative journalist with sharp eyes and determination",
+                "personality": "Tenacious, curious, slightly cynical",
+                "goals": "Expose the truth about government corruption",
+                "conflicts": "Balancing career with personal safety"
+            },
+            "2": {
+                "name": "Detective Mike Rodriguez",
+                "age": 45,
+                "description": "Veteran detective with a weathered face and kind eyes",
+                "personality": "Wise, protective, slightly jaded",
+                "goals": "Solve the case and protect Sarah",
+                "conflicts": "Department politics vs. doing what's right"
+            },
+            "3": {
+                "name": "Senator James Whitmore",
+                "age": 58,
+                "description": "Powerful politician with expensive suits and cold demeanor",
+                "personality": "Calculating, ruthless, charming when needed",
+                "goals": "Maintain power and cover up corruption",
+                "conflicts": "Growing paranoia about being exposed"
+            }
+        }
+        
+        # Sample locations
+        locations = {
+            "1": {
+                "name": "City News Office",
+                "description": "Busy newsroom with desks, computers, and coffee machines",
+                "objects": ["desks", "computers", "coffee machines", "whiteboards"],
+                "lighting": "Fluorescent overhead lighting",
+                "date_time": "Day",
+                "type": "Indoor"
+            },
+            "2": {
+                "name": "Police Station",
+                "description": "Old building with worn furniture and case files everywhere",
+                "objects": ["desks", "filing cabinets", "evidence bags", "coffee pot"],
+                "lighting": "Dim fluorescent lighting",
+                "date_time": "Day",
+                "type": "Indoor"
+            },
+            "3": {
+                "name": "Senate Building",
+                "description": "Imposing government building with marble floors and security",
+                "objects": ["marble floors", "security cameras", "expensive furniture", "portraits"],
+                "lighting": "Elegant chandeliers",
+                "date_time": "Day",
+                "type": "Indoor"
+            },
+            "4": {
+                "name": "Dark Alley",
+                "description": "Narrow alley with dumpsters and graffiti-covered walls",
+                "objects": ["dumpsters", "graffiti", "trash cans", "fire escapes"],
+                "lighting": "Street lights and shadows",
+                "date_time": "Night",
+                "type": "Outdoor"
+            }
+        }
+        
+        # Sample scenes
+        scenes = {
+            "1": {
+                "id": "1",
+                "scene_number": 1,
+                "title": "The Tip",
+                "location": "City News Office",
+                "time_of_day": "Day",
+                "tone_mood": ["tense", "mysterious"],
+                "characters": ["Sarah Chen"],
+                "action": "Sarah sits at her desk, surrounded by newspaper clippings. She's been working late, and the office is nearly empty. Her phone rings with an anonymous tip about government corruption.",
+                "goal": "Introduce Sarah and the central mystery"
+            },
+            "2": {
+                "id": "2",
+                "scene_number": 2,
+                "title": "Meeting the Detective",
+                "location": "Police Station",
+                "time_of_day": "Day",
+                "tone_mood": ["professional", "suspenseful"],
+                "characters": ["Sarah Chen", "Detective Mike Rodriguez"],
+                "action": "Sarah meets Detective Rodriguez to discuss the case. He's initially skeptical but becomes intrigued by her evidence. They form an uneasy alliance.",
+                "goal": "Establish the partnership between Sarah and Mike"
+            },
+            "3": {
+                "id": "3",
+                "scene_number": 3,
+                "title": "The Senator's Office",
+                "location": "Senate Building",
+                "time_of_day": "Day",
+                "tone_mood": ["tense", "powerful"],
+                "characters": ["Sarah Chen", "Senator James Whitmore"],
+                "action": "Sarah confronts Senator Whitmore with her findings. He denies everything but his nervous behavior reveals the truth. The tension builds as they engage in a verbal chess match.",
+                "goal": "Show the confrontation and establish the antagonist"
+            },
+            "4": {
+                "id": "4",
+                "scene_number": 4,
+                "title": "The Chase",
+                "location": "Dark Alley",
+                "time_of_day": "Night",
+                "tone_mood": ["action", "dangerous"],
+                "characters": ["Sarah Chen", "Detective Mike Rodriguez"],
+                "action": "Sarah and Mike are chased through the dark alley by unknown assailants. They must work together to escape, revealing their growing trust and the danger they're in.",
+                "goal": "Create action and show the stakes"
+            }
+        }
+        
+        # Update the script with sample data
+        script = self.get_script("Test", script_id)
+        if script:
+            script['characters'] = characters
+            script['locations'] = locations
+            script['scenes'] = scenes
+            self.update_script("Test", script_id, script)
+        
+        return script_id 

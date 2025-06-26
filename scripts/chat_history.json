@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "role": "user",
+    "content": "hi\n",
+    "timestamp": "2025-06-26T17:07:04.868643"
+  },
+  {
+    "role": "assistant",
+    "content": "I'm here to help! Feel free to ask me any questions about your script, characters, scenes, or writing process.",
+    "timestamp": "2025-06-26T17:07:04.869759"
+  }
+]

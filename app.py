@@ -62,16 +62,6 @@ script_selector = ScriptSelector(user_manager)
 # Initialize script-aware manager
 script_aware_manager = ScriptAwareManager(user_manager)
 
-# Render script selector
-current_script_id = script_selector.render_script_selector(username)
-
-if current_script_id:
-    st.session_state.current_script_id = current_script_id
-    script_selector.render_script_actions(username, current_script_id)
-else:
-    st.info("Please create or select a script to continue!")
-    st.stop()
-
 # Initialize managers (keeping original for compatibility with other features)
 @st.cache_resource
 def get_managers():
@@ -87,15 +77,10 @@ with st.sidebar:
     st.markdown("## 🎬 YanaChat")
     st.markdown("AI Script Assistant for Filmmakers")
     
-    # Quick create script button
-    if st.button("🎬 Create New Script", type="primary"):
-        st.session_state.show_create_script = True
-        st.rerun()
-    
     selected = option_menu(
         menu_title="Navigation",
-        options=["Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
-        icons=["house", "person", "map-pin", "film", "list", "pencil", "graph-up", "chat"],
+        options=["Script Manager", "Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
+        icons=["folder", "house", "person", "map-pin", "film", "list", "pencil", "graph-up", "chat"],
         menu_icon="cast",
         default_index=0,
     )
@@ -194,6 +179,26 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Script Manager
+if selected == "Script Manager":
+    st.markdown('<h1 class="section-header">📚 Script Manager</h1>', unsafe_allow_html=True)
+    
+    # Render script selector
+    current_script_id = script_selector.render_script_selector(username)
+    
+    if current_script_id:
+        st.session_state.current_script_id = current_script_id
+        script_selector.render_script_actions(username, current_script_id)
+    else:
+        st.info("Please create or select a script to continue!")
+        st.stop()
+
+# Check if script is selected for other sections
+if selected != "Script Manager":
+    if 'current_script_id' not in st.session_state:
+        st.error("Please go to Script Manager and select a script first!")
+        st.stop()
 
 # Dashboard
 if selected == "Dashboard":

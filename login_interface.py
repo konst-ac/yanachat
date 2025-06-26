@@ -70,6 +70,20 @@ class LoginInterface:
                             st.success(f"Account created successfully! You can now login as {new_username}")
                         else:
                             st.error("Error creating account!")
+            
+            # Create Test user with sample data
+            st.divider()
+            st.subheader("🧪 Test Account")
+            st.info("Create a Test account with sample data to explore the app features.")
+            
+            if st.button("Create Test Account with Sample Data", type="secondary"):
+                try:
+                    script_id = self.user_manager.create_test_user_with_sample_data()
+                    st.success("Test account created successfully!")
+                    st.info("Username: Test | Password: test123")
+                    st.info("Sample script 'The Investigation' with 3 characters, 4 locations, and 4 scenes has been created.")
+                except Exception as e:
+                    st.error(f"Error creating test account: {str(e)}")
         
         return False, ""
     
