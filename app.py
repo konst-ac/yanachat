@@ -890,7 +890,12 @@ elif selected == "Chat":
     
     # Show context summary
     with st.expander("📋 Current Script Context"):
-        context_summary = chat_manager.get_context_summary(script_aware_manager, script_aware_manager, script_aware_manager, username)
+        context_summary = chat_manager.get_context_summary(
+            character_manager=script_aware_manager, 
+            scene_manager=script_aware_manager, 
+            location_manager=script_aware_manager, 
+            username=username
+        )
         if context_summary:
             st.text(context_summary)
         else:
@@ -934,7 +939,13 @@ elif selected == "Chat":
         
         if is_question:
             # Get context and generate response
-            context = chat_manager.get_full_context_for_ai(script_aware_manager, script_aware_manager, script_aware_manager, user_input, username)
+            context = chat_manager.get_full_context_for_ai(
+                character_manager=script_aware_manager, 
+                scene_manager=script_aware_manager, 
+                location_manager=script_aware_manager, 
+                user_message=user_input, 
+                username=username
+            )
             
             with st.spinner("🤔 Yana is thinking..."):
                 ai_response = llm_client.chat_with_context(user_input, context)
