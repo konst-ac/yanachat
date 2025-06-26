@@ -36,19 +36,21 @@ class LLMClient:
             full_prompt = f"""
 You are an expert screenwriting assistant with full knowledge of the filmmaker's script. Use the context below to provide personalized, relevant advice.
 
+IMPORTANT: Keep your responses short and concise (2-3 sentences maximum). Only answer if the user is asking a question.
+
 CONTEXT:
 {context}
 
 USER MESSAGE: {user_message}
 
-Please respond as a helpful screenwriting assistant, referencing specific characters, scenes, and previous conversation when relevant. Be conversational but professional.
+Please respond as a helpful screenwriting assistant, referencing specific characters, scenes, and previous conversation when relevant. Be conversational but professional. Keep answers brief and to the point.
 """
             
             response = self.model.generate_content(
                 full_prompt,
                 generation_config=genai.types.GenerationConfig(
                     temperature=self.temperature,
-                    max_output_tokens=self.max_tokens
+                    max_output_tokens=150  # Reduced for shorter responses
                 )
             )
             return response.text

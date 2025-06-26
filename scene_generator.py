@@ -114,12 +114,16 @@ class SceneGenerator:
             height=500,
             placeholder="Write your scene here, including action, dialogue, character movements, and visual elements. You can mix action and dialogue naturally in the flow of your scene..."
         )
+        
+        # Process Scene button right after text input
+        if st.button("⚙️ Process Scene", type="secondary", key="process_scene_editor"):
+            self.process_scene()
     
     def render_prompt_assistant_sidebar(self):
         """Render the Prompt Assistant Sidebar"""
         st.markdown('<h3 class="section-header">🤖 Prompt Assistant</h3>', unsafe_allow_html=True)
         
-        with st.expander("AI Writing Assistant", expanded=True):
+        with st.expander("AI Writing Assistant", expanded=False):
             if st.button("📝 Summarize this scene"):
                 self.summarize_scene()
             
@@ -207,7 +211,7 @@ class SceneGenerator:
         """Render action buttons at the bottom"""
         st.markdown("---")
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
             if st.button("💾 Save Scene", type="primary"):
@@ -236,6 +240,10 @@ class SceneGenerator:
         with col4:
             if st.button("🎯 Auto-Generate"):
                 self.auto_generate_scene()
+        
+        with col5:
+            if st.button("⚙️ Process Scene", type="secondary"):
+                self.process_scene()
     
     def summarize_scene(self):
         """Summarize the current scene"""
@@ -360,4 +368,35 @@ class SceneGenerator:
         st.session_state.current_scene['action'] = generated_scene
         
         st.success("Scene auto-generated! Review and edit as needed.")
-        st.rerun() 
+        st.rerun()
+    
+    def process_scene(self):
+        """Process the scene to improve dialogue, writing, and structure"""
+        if not st.session_state.current_scene['action']:
+            st.error("Please add some content to the scene first!")
+            return
+        
+        scene_text = st.session_state.current_scene['action']
+        
+        with st.spinner("Processing scene - improving dialogue, writing, and structure..."):
+            # Process the scene with AI
+            prompt = f"""
+            Please improve this scene by enhancing the dialogue, writing quality, and structure:
+            
+            {scene_text}
+            
+            Please provide improvements in these areas:
+            1. Dialogue: Make it more natural, character-specific, and engaging
+            2. Writing: Improve clarity, flow, and visual storytelling
+            3. Structure: Enhance pacing, scene beats, and dramatic tension
+            
+            Return the improved scene text.
+            """
+            
+            processed_scene = self.llm_client.generate_response(prompt)
+            
+            # Update the scene with processed content
+            st.session_state.current_scene['action'] = processed_scene
+            
+            st.success("Scene processed and improved! Review the changes.")
+            st.rerun() 

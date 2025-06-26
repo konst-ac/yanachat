@@ -28,10 +28,51 @@ from word_exporter import WordExporter
 from scene_generator import SceneGenerator
 from sample_data import add_sample_data_to_managers
 
+# Import new user management modules
+from user_manager import UserManager
+from login_interface import LoginInterface
+from script_selector import ScriptSelector
+from script_aware_manager import ScriptAwareManager
+
 # Initialize configuration
 Config.create_directories()
 
-# Initialize managers
+# Initialize user manager
+@st.cache_resource
+def get_user_manager():
+    return UserManager()
+
+user_manager = get_user_manager()
+
+# Initialize login interface
+login_interface = LoginInterface(user_manager)
+
+# Check authentication
+is_authenticated, username = login_interface.render_login()
+
+if not is_authenticated:
+    st.stop()
+
+# User is authenticated, show logout in sidebar
+login_interface.render_logout()
+
+# Initialize script selector
+script_selector = ScriptSelector(user_manager)
+
+# Initialize script-aware manager
+script_aware_manager = ScriptAwareManager(user_manager)
+
+# Render script selector
+current_script_id = script_selector.render_script_selector(username)
+
+if current_script_id:
+    st.session_state.current_script_id = current_script_id
+    script_selector.render_script_actions(username, current_script_id)
+else:
+    st.info("Please create or select a script to continue!")
+    st.stop()
+
+# Initialize managers (keeping original for compatibility)
 @st.cache_resource
 def get_managers():
     return CharacterManager(), SceneManager(), LocationManager(), TextModifier(), LLMClient(), ChatManager(), WordExporter()
@@ -40,6 +81,24 @@ character_manager, scene_manager, location_manager, text_modifier, llm_client, c
 
 # Initialize scene generator
 scene_generator = SceneGenerator(character_manager, scene_manager, location_manager, llm_client)
+
+# Sidebar navigation
+with st.sidebar:
+    st.markdown("## 🎬 YanaChat")
+    st.markdown("AI Script Assistant for Filmmakers")
+    
+    # Quick create script button
+    if st.button("🎬 Create New Script", type="primary"):
+        st.session_state.show_create_script = True
+        st.rerun()
+    
+    selected = option_menu(
+        menu_title="Navigation",
+        options=["Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
+        icons=["house", "person", "map-pin", "film", "list", "pencil", "graph-up", "chat"],
+        menu_icon="cast",
+        default_index=0,
+    )
 
 # Custom CSS for modern styling
 st.markdown("""
@@ -118,8 +177,9 @@ st.markdown("""
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     .suggestion-button {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        border: none;
+        background: transparent;
+        border: 2px solid #667eea;
+        color: #667eea;
         border-radius: 15px;
         padding: 8px 16px;
         margin: 4px;
@@ -127,24 +187,13 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     .suggestion-button:hover {
+        background: #667eea;
+        color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Sidebar navigation
-with st.sidebar:
-    st.markdown("## 🎬 YanaChat")
-    st.markdown("AI Script Assistant for Filmmakers")
-    
-    selected = option_menu(
-        menu_title="Navigation",
-        options=["Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
-        icons=["house", "person", "map-pin", "film", "list", "pencil", "graph-up", "chat"],
-        menu_icon="cast",
-        default_index=0,
-    )
 
 # Dashboard
 if selected == "Dashboard":
@@ -725,47 +774,60 @@ elif selected == "Script Analysis":
             for char in characters.values():
                 char_data.append({
                     'Name': char.get('name', 'Unknown'),
-                    'Age': char.get('age', 0),
-                    'Description Length': len(char.get('description', ''))
+                    'Description Length': len(char.get('description', '')),
+                    'Personality': len(char.get('personality', ''))
                 })
             
             df_char = pd.DataFrame(char_data)
             st.dataframe(df_char)
-            
-            # Age distribution
-            if not df_char.empty and 'Age' in df_char.columns:
-                fig_age = px.histogram(df_char, x='Age', title='Character Age Distribution')
-                st.plotly_chart(fig_age, use_container_width=True)
         else:
             st.info("No characters to analyze.")
     
     with col2:
-        # Scene analysis
-        st.subheader("🎬 Scene Analysis")
+        # Location analysis
+        st.subheader("📍 Location Analysis")
         
-        scenes = scene_manager.get_scene_sequence()
-        if scenes:
-            scene_data = []
-            for scene in scenes:
-                characters_count = len(scene.get('characters', [])) if isinstance(scene.get('characters', []), list) else 0
-                scene_data.append({
-                    'Scene': scene.get('scene_number', 0),
-                    'Title': scene.get('title', 'No title'),
-                    'Location': scene.get('location', 'Unknown'),
-                    'Characters': characters_count,
-                    'Content Length': len(scene.get('action', '')),
-                    'Time': scene.get('time_of_day', 'Unknown')
+        locations = location_manager.get_all_locations()
+        if locations:
+            loc_data = []
+            for loc in locations.values():
+                loc_data.append({
+                    'Name': loc.get('name', 'Unknown'),
+                    'Description Length': len(loc.get('description', '')),
+                    'Type': loc.get('type', 'Unknown')
                 })
             
-            df_scene = pd.DataFrame(scene_data)
-            st.dataframe(df_scene)
-            
-            # Scene length analysis
-            if not df_scene.empty:
-                fig_length = px.line(df_scene, x='Scene', y='Content Length', title='Scene Length Progression')
-                st.plotly_chart(fig_length, use_container_width=True)
+            df_loc = pd.DataFrame(loc_data)
+            st.dataframe(df_loc)
         else:
-            st.info("No scenes to analyze.")
+            st.info("No locations to analyze.")
+    
+    # Scene analysis
+    st.subheader("🎬 Scene Analysis")
+    
+    scenes = scene_manager.get_scene_sequence()
+    if scenes:
+        scene_data = []
+        for scene in scenes:
+            characters_count = len(scene.get('characters', [])) if isinstance(scene.get('characters', []), list) else 0
+            scene_data.append({
+                'Scene': scene.get('scene_number', 0),
+                'Title': scene.get('title', 'No title'),
+                'Location': scene.get('location', 'Unknown'),
+                'Characters': characters_count,
+                'Content Length': len(scene.get('action', '')),
+                'Time': scene.get('time_of_day', 'Unknown')
+            })
+        
+        df_scene = pd.DataFrame(scene_data)
+        st.dataframe(df_scene)
+        
+        # Scene length analysis
+        if not df_scene.empty:
+            fig_length = px.line(df_scene, x='Scene', y='Content Length', title='Scene Length Progression')
+            st.plotly_chart(fig_length, use_container_width=True)
+    else:
+        st.info("No scenes to analyze.")
     
     # AI-powered insights
     st.subheader("🤖 AI-Powered Insights")
@@ -820,7 +882,10 @@ elif selected == "Chat":
     
     # Chat input
     with st.form("chat_form"):
+        # Use suggestion from session state if available
+        default_value = st.session_state.get('chat_suggestion', '')
         user_input = st.text_area("💬 Ask me anything about your script:", 
+                                 value=default_value,
                                  height=100, 
                                  placeholder="e.g., 'How can I improve the dialogue in Scene 2?' or 'What conflicts would work well for my protagonist?'")
         
@@ -832,20 +897,42 @@ elif selected == "Chat":
                 chat_manager.clear_chat_history()
                 st.rerun()
     
+    # Clear the suggestion after it's been used
+    if 'chat_suggestion' in st.session_state:
+        del st.session_state.chat_suggestion
+    
     if send_button and user_input:
         # Add user message to history
         chat_manager.add_message('user', user_input)
         
-        # Get context and generate response
-        context = chat_manager.get_full_context_for_ai(character_manager, scene_manager, location_manager, user_input)
+        # Check if user is asking a question
+        question_indicators = ['?', 'how', 'what', 'why', 'when', 'where', 'who', 'which', 'can you', 'could you', 'would you', 'please']
+        is_question = any(indicator in user_input.lower() for indicator in question_indicators)
         
-        with st.spinner("🤔 Yana is thinking..."):
-            ai_response = llm_client.chat_with_context(user_input, context)
+        if is_question:
+            # Get context and generate response
+            context = chat_manager.get_full_context_for_ai(character_manager, scene_manager, location_manager, user_input)
             
-            # Add AI response to history
+            with st.spinner("🤔 Yana is thinking..."):
+                ai_response = llm_client.chat_with_context(user_input, context)
+                
+                # Add AI response to history
+                chat_manager.add_message('assistant', ai_response)
+                
+                # Display the response
+                st.markdown(f"""
+                <div class="chat-message-ai">
+                    <h4>🎬 Yana's Response:</h4>
+                    {ai_response}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.rerun()
+        else:
+            # If not a question, just acknowledge
+            ai_response = "I'm here to help! Feel free to ask me any questions about your script, characters, scenes, or writing process."
             chat_manager.add_message('assistant', ai_response)
             
-            # Display the response
             st.markdown(f"""
             <div class="chat-message-ai">
                 <h4>🎬 Yana's Response:</h4>
@@ -878,8 +965,14 @@ elif selected == "Chat":
     for i, suggestion in enumerate(suggestions):
         with cols[i % 2]:
             if st.button(suggestion, key=f"suggestion_{i}"):
+                # Set the suggestion in session state and rerun to populate the form
                 st.session_state.chat_suggestion = suggestion
                 st.rerun()
+    
+    # Check if there's a suggestion to populate
+    if 'chat_suggestion' in st.session_state and st.session_state.chat_suggestion:
+        # This will be handled in the form above
+        pass
 
 # Footer
 st.markdown("---")
