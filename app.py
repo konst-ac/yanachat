@@ -79,138 +79,84 @@ with st.sidebar:
     
     selected = option_menu(
         menu_title="Navigation",
-        options=["Script Manager", "Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Text Tools", "Script Analysis", "Chat"],
-        icons=["folder", "house", "person", "geo-alt", "film", "list", "pencil", "graph-up", "chat"],
+        options=["Script Manager", "Dashboard", "Characters", "Locations", "Scene Generator", "Scenes", "Script Analysis", "Chat"],
+        icons=["folder", "house", "person", "geo-alt", "film", "list", "graph-up", "chat"],
         menu_icon="cast",
         default_index=0,
     )
 
 # Custom CSS for modern styling
-st.markdown("""
+st.markdown('''
 <style>
-    .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #1f77b4;
-        text-align: center;
-        margin-bottom: 2rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    }
-    .section-header {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 1rem;
-        border-bottom: 3px solid #3498db;
-        padding-bottom: 0.5rem;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-        margin: 1rem 0;
-    }
-    .character-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-        border-left: 5px solid #3498db;
-    }
-    .scene-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin: 1rem 0;
-        border-left: 5px solid #e74c3c;
-    }
-    .chat-message-user {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 18px 18px 4px 18px;
-        margin: 8px 0;
-        max-width: 80%;
-        margin-left: auto;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .chat-message-ai {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 18px 18px 18px 4px;
-        margin: 8px 0;
-        max-width: 80%;
-        margin-right: auto;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        padding: 0.5rem 2rem;
-        font-weight: bold;
-        min-height: 44px;
-        font-size: 0.9rem;
-    }
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .suggestion-button {
-        background: transparent;
-        border: 2px solid #667eea;
-        color: #667eea;
-        border-radius: 15px;
-        padding: 8px 16px;
-        margin: 4px;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-    }
-    .suggestion-button:hover {
-        background: #667eea;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    .chat-suggestion-button {
-        background: transparent;
-        border: 1px solid #667eea;
-        color: #667eea;
-        border-radius: 10px;
-        padding: 4px 8px;
-        margin: 2px;
-        font-size: 0.8rem;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    .chat-suggestion-button:hover {
-        background: #667eea;
-        color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .scene-action-button {
-        min-height: 44px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
+body, .stApp {
+    background: #f8f5f0 !important;
+}
+
+/* Card/Panel outlines and padding, with slightly darker background */
+.square-block, .st-expander, .metric-card, .details-section, .stForm, .stDataFrame, .stTable, .stAlert, .stInfo, .stSuccess, .stError {
+    background: #f3ede6 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    border: 1px solid #e0d9ce !important;
+    padding: 20px !important;
+}
 </style>
-""", unsafe_allow_html=True)
+''', unsafe_allow_html=True)
+
+# Add this function after the imports and before the main app logic
+def render_square_blocks(items, item_type, on_click=None):
+    if not items:
+        return
+
+    if isinstance(items, dict):
+        items_list = list(items.items())
+    else:
+        items_list = items
+
+    for i in range(0, len(items_list), 3):
+        row_items = items_list[i:i+3]
+        cols = st.columns(3)
+
+        for j, (item_id, item) in enumerate(row_items):
+            with cols[j]:
+                if item_type == 'character':
+                    title = item.get('name', 'Unknown')
+                    subtitle = f"Age: {item.get('age', 'Unknown')}"
+                    description = item.get('description', 'No description')[:80] + "..." if len(item.get('description', '')) > 80 else item.get('description', 'No description')
+                    icon = "👤"
+                elif item_type == 'location':
+                    title = item.get('name', 'Unknown')
+                    subtitle = f"Type: {item.get('type', 'Unknown')}"
+                    description = item.get('description', 'No description')[:80] + "..." if len(item.get('description', '')) > 80 else item.get('description', 'No description')
+                    icon = "📍"
+                elif item_type == 'scene':
+                    title = f"Scene {item.get('scene_number', 'N/A')}: {item.get('title', 'No title')}"
+                    subtitle = f"Location: {item.get('location', 'Unknown')}"
+                    description = item.get('action', 'No content')[:80] + "..." if len(item.get('action', '')) > 80 else item.get('action', 'No content')
+                    icon = "🎬"
+
+                block_class = f"square-block {item_type}-block"
+                block_id = f"{item_type}_{item_id}"
+                st.markdown(f'''
+                <div class="{block_class}" id="{block_id}">
+                    <div>
+                        <h3>{icon} {title}</h3>
+                        <p class="subtitle">{subtitle}</p>
+                        <p class="description">{description}</p>
+                    </div>
+                </div>
+                ''', unsafe_allow_html=True)
+                if st.button("View Details", key=f"block_{item_type}_{item_id}"):
+                    if on_click:
+                        on_click(item_id, item)
+                    else:
+                        st.session_state[f"selected_{item_type}"] = item_id
+                        st.rerun()
 
 # Script Manager
 if selected == "Script Manager":
     st.markdown('<h1 class="section-header">📚 Script Manager</h1>', unsafe_allow_html=True)
+    st.markdown('---')
     
     # Render script selector
     current_script_id = script_selector.render_script_selector(username)
@@ -231,6 +177,7 @@ if selected != "Script Manager":
 # Dashboard
 if selected == "Dashboard":
     st.markdown('<h1 class="main-header">🎬 YanaChat AI Script Assistant</h1>', unsafe_allow_html=True)
+    st.markdown('---')
     
     # Statistics
     col1, col2, col3, col4 = st.columns(4)
@@ -308,11 +255,9 @@ if selected == "Dashboard":
         st.subheader("📝 Recent Scenes")
         scenes = script_aware_manager.get_scene_sequence(username)
         if scenes:
-            for scene in scenes[-3:]:
-                with st.expander(f"Scene {scene.get('scene_number', 'N/A')}: {scene.get('title', 'No title')}"):
-                    st.write(f"**Location:** {scene.get('location', 'No location')}")
-                    st.write(f"**Characters:** {', '.join(scene.get('characters', [])) if isinstance(scene.get('characters', []), list) else scene.get('characters', 'None')}")
-                    st.write(f"**Action:** {scene.get('action', 'No action')[:100]}...")
+            # Convert to dict format for render_square_blocks
+            recent_scenes = {f"recent_{i}": scene for i, scene in enumerate(scenes[-3:])}
+            render_square_blocks(recent_scenes, 'scene')
         else:
             st.info("No scenes created yet. Start by adding your first scene!")
     
@@ -320,16 +265,16 @@ if selected == "Dashboard":
         st.subheader("👥 Recent Characters")
         characters = script_aware_manager.get_characters(username)
         if characters:
-            for char_id, char in list(characters.items())[-3:]:
-                with st.expander(f"{char.get('name', 'Unknown')}"):
-                    st.write(f"**Age:** {char.get('age', 'Unknown')}")
-                    st.write(f"**Description:** {char.get('description', 'No description')[:100]}...")
+            # Get last 3 characters
+            recent_chars = dict(list(characters.items())[-3:])
+            render_square_blocks(recent_chars, 'character')
         else:
             st.info("No characters created yet. Start by adding your first character!")
 
 # Characters Management
 elif selected == "Characters":
     st.markdown('<h1 class="section-header">👥 Character Management</h1>', unsafe_allow_html=True)
+    st.markdown('---')
     
     # Character creation
     with st.expander("➕ Add New Character", expanded=False):
@@ -377,50 +322,59 @@ elif selected == "Characters":
         characters = script_aware_manager.get_characters(username)
     
     if characters:
-        for character_id, character in characters.items():
-            with st.container():
+        def on_character_click(item_id, item):
+            st.session_state["selected_character"] = item_id
+            st.rerun()
+        
+        render_square_blocks(characters, 'character', on_character_click)
+        
+        # Show selected character details
+        if st.session_state.get("selected_character"):
+            selected_char_id = st.session_state["selected_character"]
+            if selected_char_id in characters:
+                selected_char = characters[selected_char_id]
+                st.markdown("---")
                 st.markdown(f"""
-                <div class="character-card">
-                    <h3>{character.get('name', 'Unknown')}</h3>
-                    <p><strong>Age:</strong> {character.get('age', 'Unknown')}</p>
-                    <p><strong>Description:</strong> {character.get('description', 'No description')}</p>
-                    <p><strong>Personality:</strong> {character.get('personality', 'No personality traits')}</p>
+                <div id="details_character_{selected_char_id}" class="details-section">
+                    <h3>👤 {selected_char.get('name', 'Unknown')} - Details</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                col1, col2, col3 = st.columns(3)
-                
+                col1, col2 = st.columns([2, 1])
                 with col1:
-                    if st.button(f"Edit {character.get('name')}", key=f"edit_{character_id}"):
-                        st.session_state.editing_character = character_id
+                    st.write(f"**Age:** {selected_char.get('age', 'Unknown')}")
+                    st.write(f"**Description:** {selected_char.get('description', 'No description')}")
+                    st.write(f"**Personality:** {selected_char.get('personality', 'No personality traits')}")
+                    st.write(f"**Goals:** {selected_char.get('goals', 'No goals')}")
+                    st.write(f"**Conflicts:** {selected_char.get('conflicts', 'No conflicts')}")
                 
                 with col2:
-                    if st.button(f"Analyze {character.get('name')}", key=f"analyze_{character_id}"):
+                    if st.button("✏️ Edit Character", key="edit_selected_char"):
+                        st.session_state.editing_character = selected_char_id
+                    
+                    if st.button("🔍 Analyze Character", key="analyze_selected_char"):
                         with st.spinner("Analyzing character..."):
-                            analysis = llm_client.analyze_character(character)
+                            analysis = llm_client.analyze_character(selected_char)
                             st.text_area("Character Analysis", analysis, height=300)
-                
-                with col3:
-                    if st.button(f"Delete {character.get('name')}", key=f"delete_{character_id}"):
-                        if script_aware_manager.delete_character(username, character_id):
-                            st.success(f"Character '{character.get('name')}' deleted!")
+                    
+                    if st.button("🗑️ Delete Character", key="delete_selected_char"):
+                        if script_aware_manager.delete_character(username, selected_char_id):
+                            st.success(f"Character '{selected_char.get('name')}' deleted!")
+                            del st.session_state["selected_character"]
                             st.rerun()
                         else:
                             st.error("Error deleting character.")
-                
-                # Character notes
-                if 'notes' in character and character['notes']:
-                    st.subheader("📝 Notes")
-                    for note in character['notes']:
-                        st.info(f"{note['text']} - {note['timestamp'][:10]}")
-                
-                st.divider()
+                    
+                    if st.button("❌ Close Details", key="close_char_details"):
+                        del st.session_state["selected_character"]
+                        st.rerun()
     else:
         st.info("No characters found. Create your first character to get started!")
 
 # Locations Management
 elif selected == "Locations":
     st.markdown('<h1 class="section-header">📍 Location Management</h1>', unsafe_allow_html=True)
+    st.markdown('---')
     
     # Location creation
     with st.expander("➕ Add New Location", expanded=False):
@@ -468,50 +422,95 @@ elif selected == "Locations":
         locations = script_aware_manager.get_locations(username)
     
     if locations:
-        for location_id, location in locations.items():
-            with st.container():
+        def on_location_click(item_id, item):
+            st.session_state["selected_location"] = item_id
+            st.rerun()
+        
+        render_square_blocks(locations, 'location', on_location_click)
+        
+        # Show selected location details
+        if st.session_state.get("selected_location"):
+            selected_loc_id = st.session_state["selected_location"]
+            if selected_loc_id in locations:
+                selected_loc = locations[selected_loc_id]
+                st.markdown("---")
                 st.markdown(f"""
-                <div class="location-card">
-                    <h3>{location.get('name', 'No name')}</h3>
-                    <p><strong>Description:</strong> {location.get('description', 'No description')}</p>
-                    <p><strong>Objects:</strong> {', '.join(location.get('objects', [])) if isinstance(location.get('objects', []), list) else location.get('objects', 'No objects')}</p>
-                    <p><strong>Type:</strong> {location.get('type', 'No type')}</p>
-                    <p><strong>Lighting:</strong> {location.get('lighting', 'No lighting info')}</p>
-                    <p><strong>Time:</strong> {location.get('date_time', 'No time info')}</p>
+                <div id="details_location_{selected_loc_id}" class="details-section">
+                    <h3>📍 {selected_loc.get('name', 'Unknown')} - Details</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    if st.button(f"Edit {location.get('name')}", key=f"edit_loc_{location_id}"):
-                        st.session_state.editing_location = location_id
-                
-                with col2:
-                    if st.button(f"View Scenes {location.get('name')}", key=f"view_scenes_{location_id}"):
-                        scenes = script_aware_manager.search_scenes(username, location.get('name'))
-                        if scenes:
-                            st.subheader(f"Scenes in {location.get('name')}")
-                            for scene in scenes:
-                                st.write(f"Scene {scene.get('scene_number')}: {scene.get('title', 'No title')}")
-                        else:
-                            st.info(f"No scenes set in {location.get('name')}")
-                
-                with col3:
-                    if st.button(f"Delete {location.get('name')}", key=f"delete_loc_{location_id}"):
-                        if script_aware_manager.delete_location(username, location_id):
-                            st.success(f"Location '{location.get('name')}' deleted!")
+                if st.session_state.get('editing_location') == selected_loc_id:
+                    st.info(f"[DEBUG] Edit mode active for location: {selected_loc_id}")
+                    st.markdown('---')
+                    st.markdown(f"<h3>Edit Location: {selected_loc.get('name', 'Unknown')}</h3>", unsafe_allow_html=True)
+                    with st.form(f"edit_location_form_{selected_loc_id}"):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            name = st.text_input("Location Name", value=selected_loc.get('name', ''))
+                            description = st.text_area("Location Description", value=selected_loc.get('description', ''))
+                            objects = st.text_area("Objects (comma-separated)", value=','.join(selected_loc.get('objects', [])) if isinstance(selected_loc.get('objects', []), list) else selected_loc.get('objects', ''))
+                        with col2:
+                            lighting = st.text_input("Lighting", value=selected_loc.get('lighting', ''))
+                            date_time = st.text_input("Date/Time", value=selected_loc.get('date_time', ''))
+                            location_type = st.selectbox("Location Type", ["Indoor", "Outdoor", "Public", "Private", "Other"], index=["Indoor", "Outdoor", "Public", "Private", "Other"].index(selected_loc.get('type', 'Other')) if selected_loc.get('type', 'Other') in ["Indoor", "Outdoor", "Public", "Private", "Other"] else 4)
+                        save, cancel = st.columns(2)
+                        with save:
+                            if st.form_submit_button("Save Changes"):
+                                updated_location = {
+                                    'name': name,
+                                    'description': description,
+                                    'objects': [obj.strip() for obj in objects.split(',') if obj.strip()],
+                                    'lighting': lighting,
+                                    'date_time': date_time,
+                                    'type': location_type,
+                                    'id': selected_loc.get('id'),
+                                    'created_at': selected_loc.get('created_at'),
+                                    'updated_at': selected_loc.get('updated_at'),
+                                }
+                                if script_aware_manager.update_location(username, selected_loc_id, updated_location):
+                                    st.success("Location updated!")
+                                    st.session_state.editing_location = None
+                                    st.rerun()
+                                else:
+                                    st.error("Error updating location.")
+                                    st.session_state.editing_location = None
+                                    st.rerun()
+                        with cancel:
+                            if st.form_submit_button("Cancel"):
+                                st.session_state.editing_location = None
+                                st.rerun()
+                else:
+                    if st.session_state.get('editing_location'):
+                        st.info(f"[DEBUG] Not in edit mode for this location. (editing_location={st.session_state.get('editing_location')}, selected={selected_loc_id})")
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        st.write(f"**Description:** {selected_loc.get('description', 'No description')}")
+                        st.write(f"**Objects:** {', '.join(selected_loc.get('objects', [])) if isinstance(selected_loc.get('objects', []), list) else selected_loc.get('objects', 'No objects')}")
+                        st.write(f"**Type:** {selected_loc.get('type', 'No type')}")
+                        st.write(f"**Lighting:** {selected_loc.get('lighting', 'No lighting info')}")
+                        st.write(f"**Time:** {selected_loc.get('date_time', 'No time info')}")
+                    with col2:
+                        if st.button("✏️ Edit Location", key="edit_selected_loc"):
+                            st.session_state.editing_location = selected_loc_id
+                        if st.button("🎬 View Scenes", key="view_scenes_selected_loc"):
+                            scenes = script_aware_manager.search_scenes(username, selected_loc.get('name'))
+                            if scenes:
+                                st.subheader(f"Scenes in {selected_loc.get('name')}")
+                                for scene_id, scene in scenes.items():
+                                    st.write(f"Scene {scene.get('scene_number')}: {scene.get('title', 'No title')}")
+                            else:
+                                st.info(f"No scenes set in {selected_loc.get('name')}")
+                        if st.button("🗑️ Delete Location", key="delete_selected_loc"):
+                            if script_aware_manager.delete_location(username, selected_loc_id):
+                                st.success(f"Location '{selected_loc.get('name')}' deleted!")
+                                del st.session_state["selected_location"]
+                                st.rerun()
+                            else:
+                                st.error("Error deleting location.")
+                        if st.button("❌ Close Details", key="close_loc_details"):
+                            del st.session_state["selected_location"]
                             st.rerun()
-                        else:
-                            st.error("Error deleting location.")
-                
-                # Location notes
-                if 'notes' in location and location['notes']:
-                    st.subheader("📝 Notes")
-                    for note in location['notes']:
-                        st.info(f"{note['text']} - {note['timestamp'][:10]}")
-                
-                st.divider()
     else:
         st.info("No locations found. Create your first location to get started!")
 
@@ -522,61 +521,7 @@ elif selected == "Scene Generator":
 # Scenes Management
 elif selected == "Scenes":
     st.markdown('<h1 class="section-header">🎬 Scene Management</h1>', unsafe_allow_html=True)
-    
-    # Export options
-    with st.expander("📄 Export to Word", expanded=False):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("Export Single Scene")
-            scenes = script_aware_manager.get_scene_sequence(username)
-            if scenes:
-                scene_options = [f"Scene {s.get('scene_number', 'N/A')}: {s.get('title', 'No title')}" for s in scenes]
-                selected_scene_index = st.selectbox("Select scene to export:", range(len(scenes)), format_func=lambda x: scene_options[x])
-                
-                if st.button("Export Single Scene"):
-                    try:
-                        selected_scene = scenes[selected_scene_index]
-                        filepath = word_exporter.export_single_scene(selected_scene)
-                        
-                        # Read the file for download
-                        with open(filepath, 'rb') as f:
-                            st.download_button(
-                                label="📥 Download Scene",
-                                data=f.read(),
-                                file_name=os.path.basename(filepath),
-                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            )
-                        st.success(f"Scene exported successfully!")
-                    except Exception as e:
-                        st.error(f"Error exporting scene: {str(e)}")
-            else:
-                st.info("No scenes to export.")
-        
-        with col2:
-            st.subheader("Export Full Script")
-            if scenes:
-                title = st.text_input("Script Title:", value="My Screenplay")
-                author = st.text_input("Author:", value="Screenwriter")
-                
-                if st.button("Export Full Script"):
-                    try:
-                        characters = list(script_aware_manager.get_characters(username).values())
-                        filepath = word_exporter.export_scenes_to_word(scenes, characters, title, author)
-                        
-                        # Read the file for download
-                        with open(filepath, 'rb') as f:
-                            st.download_button(
-                                label="📥 Download Full Script",
-                                data=f.read(),
-                                file_name=os.path.basename(filepath),
-                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            )
-                        st.success(f"Full script exported successfully!")
-                    except Exception as e:
-                        st.error(f"Error exporting script: {str(e)}")
-            else:
-                st.info("No scenes to export.")
+    st.markdown('---')
     
     # Scene creation
     with st.expander("➕ Add New Scene", expanded=False):
@@ -625,162 +570,75 @@ elif selected == "Scenes":
         scenes = script_aware_manager.get_scenes(username)
     
     if scenes:
-        for scene_id, scene in scenes.items():
-            with st.container():
+        def on_scene_click(item_id, item):
+            st.session_state["selected_scene"] = item_id
+            st.rerun()
+        
+        render_square_blocks(scenes, 'scene', on_scene_click)
+        
+        # Show selected scene details
+        if st.session_state.get("selected_scene"):
+            selected_scene_id = st.session_state["selected_scene"]
+            if selected_scene_id in scenes:
+                selected_scene = scenes[selected_scene_id]
+                st.markdown("---")
                 st.markdown(f"""
-                <div class="scene-card">
-                    <h3>Scene {scene.get('scene_number', 'N/A')}: {scene.get('title', 'No title')}</h3>
-                    <p><strong>Location:</strong> {scene.get('location', 'No location')}</p>
-                    <p><strong>Time:</strong> {scene.get('time_of_day', 'No time')}</p>
-                    <p><strong>Tone/Mood:</strong> {', '.join(scene.get('tone_mood', [])) if isinstance(scene.get('tone_mood', []), list) else scene.get('tone_mood', 'None')}</p>
-                    <p><strong>Characters:</strong> {', '.join(scene.get('characters', [])) if isinstance(scene.get('characters', []), list) else scene.get('characters', 'None')}</p>
-                    <p><strong>Goal:</strong> {scene.get('goal', 'No goal')}</p>
-                    <p><strong>Script Content:</strong> {scene.get('action', 'No content')}</p>
+                <div id="details_scene_{selected_scene_id}" class="details-section">
+                    <h3>🎬 Scene {selected_scene.get('scene_number', 'N/A')}: {selected_scene.get('title', 'No title')} - Details</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                col1, col2, col3, col4 = st.columns(4)
-                
+                col1, col2 = st.columns([2, 1])
                 with col1:
-                    if st.button(f"Edit Scene {scene.get('scene_number')}", key=f"edit_scene_{scene_id}"):
-                        st.session_state.editing_scene = scene_id
+                    st.write(f"**Location:** {selected_scene.get('location', 'No location')}")
+                    st.write(f"**Time:** {selected_scene.get('time_of_day', 'No time')}")
+                    st.write(f"**Tone/Mood:** {', '.join(selected_scene.get('tone_mood', [])) if isinstance(selected_scene.get('tone_mood', []), list) else selected_scene.get('tone_mood', 'None')}")
+                    st.write(f"**Characters:** {', '.join(selected_scene.get('characters', [])) if isinstance(selected_scene.get('characters', []), list) else selected_scene.get('characters', 'None')}")
+                    st.write(f"**Goal:** {selected_scene.get('goal', 'No goal')}")
+                    st.write(f"**Script Content:** {selected_scene.get('action', 'No content')}")
                 
                 with col2:
-                    if st.button(f"Analyze Scene {scene.get('scene_number')}", key=f"analyze_scene_{scene_id}"):
+                    if st.button("✏️ Edit Scene", key="edit_selected_scene"):
+                        st.session_state.editing_scene = selected_scene_id
+                    
+                    if st.button("🔍 Analyze Scene", key="analyze_selected_scene"):
                         with st.spinner("Analyzing scene..."):
-                            analysis = llm_client.analyze_scene(scene)
+                            analysis = llm_client.analyze_scene(selected_scene)
                             st.text_area("Scene Analysis", analysis, height=300)
-                
-                with col3:
-                    if st.button(f"Export Scene {scene.get('scene_number')}", key=f"export_scene_{scene_id}"):
+                    
+                    if st.button("📥 Export Scene", key="export_selected_scene"):
                         try:
-                            filepath = word_exporter.export_single_scene(scene)
+                            filepath = word_exporter.export_single_scene(selected_scene)
                             with open(filepath, 'rb') as f:
                                 st.download_button(
                                     label="📥 Download",
                                     data=f.read(),
                                     file_name=os.path.basename(filepath),
                                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    key=f"download_scene_{scene_id}"
+                                    key=f"download_selected_scene"
                                 )
                             st.success("Scene exported!")
                         except Exception as e:
                             st.error(f"Error exporting: {str(e)}")
-                
-                with col4:
-                    if st.button(f"Delete Scene {scene.get('scene_number')}", key=f"delete_scene_{scene_id}"):
-                        if script_aware_manager.delete_scene(username, scene_id):
-                            st.success(f"Scene {scene.get('scene_number')} deleted!")
+                    
+                    if st.button("🗑️ Delete Scene", key="delete_selected_scene"):
+                        if script_aware_manager.delete_scene(username, selected_scene_id):
+                            st.success(f"Scene {selected_scene.get('scene_number')} deleted!")
+                            del st.session_state["selected_scene"]
                             st.rerun()
                         else:
                             st.error("Error deleting scene.")
-                
-                st.divider()
+                    
+                    if st.button("❌ Close Details", key="close_scene_details"):
+                        del st.session_state["selected_scene"]
+                        st.rerun()
     else:
         st.info("No scenes found. Create your first scene to get started!")
-
-# Text Tools
-elif selected == "Text Tools":
-    st.markdown('<h1 class="section-header">✏️ Text Modification Tools</h1>', unsafe_allow_html=True)
-    
-    # Text input
-    text_input = st.text_area("Enter your text here:", height=200, placeholder="Paste your scene, dialogue, or any text you want to modify...")
-    
-    # Show modification options regardless of text input
-    st.subheader("🛠️ Modification Options")
-    
-    if not text_input:
-        st.info("Enter some text above to start modifying it!")
-        # Add a sample text for testing
-        if st.button("Load Sample Text"):
-            st.session_state.sample_text = "Sarah sits at her desk, surrounded by newspaper clippings. She's been working late, and the office is nearly empty. Her phone rings with an anonymous tip about government corruption."
-            st.rerun()
-        
-        if 'sample_text' in st.session_state:
-            text_input = st.session_state.sample_text
-            st.text_area("Sample Text:", text_input, height=100, disabled=True)
-    
-    if text_input:
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("Tone & Style")
-            
-            # Tone modification
-            tone_options = ["dramatic", "comedic", "suspenseful", "romantic", "dark", "lighthearted", "formal", "casual"]
-            selected_tone = st.selectbox("Select tone to change to:", tone_options)
-            
-            if st.button("🎭 Change Tone"):
-                with st.spinner("Modifying tone..."):
-                    modified_text = text_modifier.modify_tone(text_input, selected_tone)
-                    st.text_area("Modified Text:", modified_text, height=200)
-            
-            # Visual elements
-            if st.button("🎬 Add Visual Elements"):
-                with st.spinner("Adding visual elements..."):
-                    enhanced_text = text_modifier.add_visual_elements(text_input)
-                    st.text_area("Enhanced Text:", enhanced_text, height=200)
-            
-            # Dialogue improvement
-            character_name = st.text_input("Character name (optional):", key="dialogue_char")
-            if st.button("💬 Improve Dialogue"):
-                with st.spinner("Improving dialogue..."):
-                    improved_dialogue = text_modifier.improve_dialogue(text_input, character_name)
-                    st.text_area("Improved Dialogue:", improved_dialogue, height=200)
-        
-        with col2:
-            st.subheader("Structure & Content")
-            
-            # Scene expansion
-            expansion_types = ["detail", "dialogue", "action", "description", "emotion"]
-            expansion_type = st.selectbox("What to expand:", expansion_types)
-            
-            if st.button("📈 Expand Scene"):
-                with st.spinner("Expanding scene..."):
-                    expanded_text = text_modifier.expand_scene(text_input, expansion_type)
-                    st.text_area("Expanded Text:", expanded_text, height=200)
-            
-            # Scene condensation
-            if st.button("📉 Condense Scene"):
-                with st.spinner("Condensing scene..."):
-                    condensed_text = text_modifier.condense_scene(text_input)
-                    st.text_area("Condensed Text:", condensed_text, height=200)
-            
-            # Perspective change
-            perspectives = ["first person", "third person limited", "third person omniscient", "second person"]
-            new_perspective = st.selectbox("Select perspective:", perspectives)
-            
-            if st.button("🔄 Change Perspective"):
-                with st.spinner("Changing perspective..."):
-                    new_text = text_modifier.change_perspective(text_input, new_perspective)
-                    st.text_area("New Perspective:", new_text, height=200)
-        
-        # Advanced tools
-        st.subheader("🔧 Advanced Tools")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            # Add conflict
-            conflict_types = ["internal", "external", "interpersonal", "environmental", "societal"]
-            conflict_type = st.selectbox("Conflict type:", conflict_types)
-            
-            if st.button("⚔️ Add Conflict"):
-                with st.spinner("Adding conflict..."):
-                    conflict_text = text_modifier.add_conflict(text_input, conflict_type)
-                    st.text_area("Text with Conflict:", conflict_text, height=200)
-        
-        with col2:
-            # Character development
-            character_name_dev = st.text_input("Character to develop:", key="dev_char")
-            if st.button("🎭 Enhance Character Development"):
-                with st.spinner("Enhancing character development..."):
-                    enhanced_text = text_modifier.enhance_character_development(text_input, character_name_dev)
-                    st.text_area("Enhanced Text:", enhanced_text, height=200)
 
 # Script Analysis
 elif selected == "Script Analysis":
     st.markdown('<h1 class="section-header">📊 Script Analysis</h1>', unsafe_allow_html=True)
+    st.markdown('---')
     
     # Overall statistics
     st.subheader("📈 Overall Statistics")
@@ -894,6 +752,9 @@ elif selected == "Chat":
     
     if chat_history:
         st.subheader("📝 Chat History")
+        st.markdown('''
+        <div style="max-height: 400px; overflow-y: auto; padding-right: 8px; border: 1px solid #eee; border-radius: 10px; background: #fafbfc; margin-bottom: 1rem;">
+        ''', unsafe_allow_html=True)
         for message in chat_history[-10:]:  # Show last 10 messages
             if message['role'] == 'user':
                 st.markdown(f"""
@@ -907,22 +768,30 @@ elif selected == "Chat":
                     <strong>Yana:</strong> {message['content']}
                 </div>
                 """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
     # Chat input
     with st.form("chat_form"):
+        # Use a key that changes to clear the input after submission
+        chat_input_key = f"chat_input_{st.session_state.get('chat_counter', 0)}"
         user_input = st.text_area(
             "Ask Yana about your script, characters, scenes, or get writing advice:",
             height=100,
             placeholder="How can I improve my protagonist's character arc?",
-            value=st.session_state.get('chat_suggestion', '')
+            value=st.session_state.get('chat_suggestion', ''),
+            key=chat_input_key
         )
         
-        col1, col2 = st.columns([3, 1])
+        col1, col2, col3 = st.columns([2, 1, 1])
         with col1:
             submitted = st.form_submit_button("Send Message", type="primary")
         with col2:
             if st.form_submit_button("Clear Chat History"):
                 chat_manager.clear_chat_history(username, script_id)
+                st.rerun()
+        with col3:
+            if st.form_submit_button("📝 Text Tools"):
+                st.session_state.show_text_tools = True
                 st.rerun()
     
     # Show context summary
@@ -970,6 +839,9 @@ elif selected == "Chat":
         # Add user message to chat history
         chat_manager.add_message(username, 'user', user_input, script_id)
         
+        # Increment chat counter to clear input on next render
+        st.session_state.chat_counter = st.session_state.get('chat_counter', 0) + 1
+        
         # Show user message immediately
         st.markdown(f"""
         <div class="chat-message-user">
@@ -1002,6 +874,111 @@ elif selected == "Chat":
             
             # Rerun to update chat history display
             st.rerun()
+
+# Text Tools Section (appears when triggered from chat)
+if st.session_state.get('show_text_tools', False):
+    st.markdown('<h1 class="section-header">✏️ Text Modification Tools</h1>', unsafe_allow_html=True)
+    st.markdown('---')
+    
+    # Close button
+    if st.button("❌ Close Text Tools"):
+        st.session_state.show_text_tools = False
+        st.rerun()
+    
+    # Text input
+    text_input = st.text_area("Enter your text here:", height=200, placeholder="Paste your scene, dialogue, or any text you want to modify...")
+    
+    # Show modification options regardless of text input
+    st.subheader("🛠️ Modification Options")
+    
+    if not text_input:
+        st.info("Enter some text above to start modifying it!")
+        # Add a sample text for testing
+        if st.button("Load Sample Text"):
+            st.session_state.sample_text = "Sarah sits at her desk, surrounded by newspaper clippings. She's been working late, and the office is nearly empty. Her phone rings with an anonymous tip about government corruption."
+            st.rerun()
+        
+        if 'sample_text' in st.session_state:
+            text_input = st.session_state.sample_text
+            st.text_area("Sample Text:", text_input, height=100, disabled=True)
+    
+    if text_input:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Tone & Style")
+            
+            # Tone modification
+            tone_options = ["dramatic", "comedic", "suspenseful", "romantic", "dark", "lighthearted", "formal", "casual"]
+            selected_tone = st.selectbox("Select tone to change to:", tone_options)
+            
+            if st.button("🎭 Change Tone"):
+                with st.spinner("Modifying tone..."):
+                    modified_text = text_modifier.modify_tone(text_input, selected_tone)
+                    st.text_area("Modified Text:", modified_text, height=200)
+            
+            # Visual elements
+            if st.button("🎬 Add Visual Elements"):
+                with st.spinner("Adding visual elements..."):
+                    enhanced_text = text_modifier.add_visual_elements(text_input)
+                    st.text_area("Enhanced Text:", enhanced_text, height=200)
+            
+            # Dialogue improvement
+            character_name = st.text_input("Character name (optional):", key="dialogue_char")
+            if st.button("💬 Improve Dialogue"):
+                with st.spinner("Improving dialogue..."):
+                    improved_dialogue = text_modifier.improve_dialogue(text_input, character_name)
+                    st.text_area("Improved Dialogue:", improved_dialogue, height=200)
+        
+        with col2:
+            st.subheader("Structure & Content")
+            
+            # Scene expansion
+            expansion_types = ["detail", "dialogue", "action", "description", "emotion"]
+            expansion_type = st.selectbox("What to expand:", expansion_types)
+            
+            if st.button("📈 Expand Scene"):
+                with st.spinner("Expanding scene..."):
+                    expanded_text = text_modifier.expand_scene(text_input, expansion_type)
+                    st.text_area("Expanded Text:", expanded_text, height=200)
+            
+            # Scene condensation
+            if st.button("📉 Condense Scene"):
+                with st.spinner("Condensing scene..."):
+                    condensed_text = text_modifier.condense_scene(text_input)
+                    st.text_area("Condensed Text:", condensed_text, height=200)
+            
+            # Perspective change
+            perspectives = ["first person", "third person limited", "third person omniscient", "second person"]
+            new_perspective = st.selectbox("Select perspective:", perspectives)
+            
+            if st.button("🔄 Change Perspective"):
+                with st.spinner("Changing perspective..."):
+                    new_text = text_modifier.change_perspective(text_input, new_perspective)
+                    st.text_area("New Perspective:", new_text, height=200)
+        
+        # Advanced tools
+        st.subheader("🔧 Advanced Tools")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Add conflict
+            conflict_types = ["internal", "external", "interpersonal", "environmental", "societal"]
+            conflict_type = st.selectbox("Conflict type:", conflict_types)
+            
+            if st.button("⚔️ Add Conflict"):
+                with st.spinner("Adding conflict..."):
+                    conflict_text = text_modifier.add_conflict(text_input, conflict_type)
+                    st.text_area("Text with Conflict:", conflict_text, height=200)
+        
+        with col2:
+            # Character development
+            character_name_dev = st.text_input("Character to develop:", key="dev_char")
+            if st.button("🎭 Enhance Character Development"):
+                with st.spinner("Enhancing character development..."):
+                    enhanced_text = text_modifier.enhance_character_development(text_input, character_name_dev)
+                    st.text_area("Enhanced Text:", enhanced_text, height=200)
 
 # Footer
 st.markdown("---")
